@@ -12,15 +12,14 @@ export default async function HomePage() {
   if (!user)
     return (
       <div className="space-y-6">
-        <LineAddCard />
         <GoogleSignIn />
+        <LineAddCard />
       </div>
     );
   const listings = await listRecords(user.folder);
 
   return (
     <div className="space-y-6">
-      <LineAddCard />
       <ArchiveForm />
       <section className="space-y-3">
         <div className="flex items-baseline justify-between border-b-2 border-yahoo pb-2">
@@ -29,6 +28,7 @@ export default async function HomePage() {
         </div>
         <LibraryList listings={listings} />
       </section>
+      <LineAddCard />
     </div>
   );
 }

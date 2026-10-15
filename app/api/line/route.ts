@@ -1,8 +1,8 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { fetchYahooListing } from "@/lib/fetch-listing";
-import { saveListing } from "@/lib/store";
+import { getRecord, saveListing } from "@/lib/store";
+import { baseUrl, buildSavedMessage, type LineMessage } from "@/lib/line-message";
 import { extractYahooUrl } from "@/lib/yahoo-url";
-import { formatYen } from "@/lib/format";
 
 export const maxDuration = 60;
 
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
 
   for (const event of events) {
     if (!event.replyToken) continue;
-    const reply = await handleEvent(event);
+    const reply = await handleEvent(event, baseUrl(request));
     if (token) {
       await sendLine(token, "https://api.line.me/v2/bot/message/reply", {
         replyToken: event.replyToken,
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
   return new Response("ok");
 }
 
-async function handleEvent(event: LineEvent): Promise<{ type: "text"; text: string }[]> {
+async function handleEvent(event: LineEvent, origin: string): Promise<LineMessage[]> {
   if (event.type === "follow") {
     return [
       {
@@ -84,20 +84,9 @@ async function handleEvent(event: LineEvent): Promise<{ type: "text"; text: stri
     return [{ type: "text", text: `保存できませんでした。\n${parsed.message}` }];
   }
 
+  const alreadySaved = Boolean(await getRecord(parsed.listing.id));
   const record = await saveListing(parsed.listing);
-  const endedNote = parsed.status === "ended" ? "（終了済み）" : "";
-  const lines = [
-    `おくったよ${endedNote}`,
-    record.title,
-    `現在価格: ${record.priceLabel}`,
-    record.bidCount != null ? `入札: ${record.bidCount}件` : "",
-    record.seller ? `出品者: ${record.seller}` : "",
-    record.endTimeLabel ? `終了: ${record.endTimeLabel}` : "",
-    record.buyNowYen ? `即決: ${formatYen(record.buyNowYen)}` : "",
-    `ID: ${record.id}`,
-  ].filter(Boolean);
-
-  return [{ type: "text", text: lines.join("\n") }];
+  return buildSavedMessage(record, { origin, ended: parsed.status === "ended", alreadySaved });
 }
 
 function validLineSignature(body: string, secret: string, signature: string): boolean {
@@ -115,7 +104,7 @@ function validLineSignature(body: string, secret: string, signature: string): bo
 async function sendLine(
   token: string,
   url: string,
-  body: { messages: { type: string; text: string }[]; replyToken?: string; to?: string },
+  body: { messages: LineMessage[]; replyToken?: string; to?: string },
 ): Promise<boolean> {
   const response = await fetch(url, {
     method: "POST",

@@ -49,11 +49,9 @@ export function buildSavedMessage(
     header: {
       type: "box",
       layout: "vertical",
-      paddingAll: "12px",
+      paddingAll: "4px",
       backgroundColor: "#ffdc00",
-      contents: [
-        { type: "text", text: "おく", weight: "bold", size: "sm", color: "#111111" },
-      ],
+      contents: [{ type: "filler" }],
     },
     body: {
       type: "box",
@@ -105,9 +103,9 @@ export function buildConnectMessage(link: string): LineMessage[] {
         header: {
           type: "box",
           layout: "vertical",
-          paddingAll: "12px",
+          paddingAll: "4px",
           backgroundColor: "#ffdc00",
-          contents: [{ type: "text", text: "おく", weight: "bold", size: "sm", color: "#111111" }],
+          contents: [{ type: "filler" }],
         },
         body: {
           type: "box",

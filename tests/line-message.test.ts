@@ -24,3 +24,10 @@ test("no hero without saved photo; already saved label", () => {
   const [m] = buildSavedMessage({ ...rec, photos: [] }, { origin: "https://a.b", alreadySaved: true });
   assert.ok(m.type === "flex" && !JSON.stringify(m.contents).includes("hero") && m.altText.includes("保存済み"));
 });
+
+test("header has no おく text but keeps yellow strip", () => {
+  const [m] = buildSavedMessage(rec, { origin: "https://oku-bice.vercel.app" });
+  const h = JSON.stringify((m as { contents: { header: unknown } }).contents.header);
+  assert.ok(!h.includes("おく"));
+  assert.ok(h.includes("#ffdc00"));
+});

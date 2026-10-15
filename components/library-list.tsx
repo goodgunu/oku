@@ -4,10 +4,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { ArchiveRecord } from "@/lib/types";
+import { classify, countByFilter, type Filter } from "@/lib/classify";
 
 export function LibraryList({ listings }: { listings: ArchiveRecord[] }) {
   const router = useRouter();
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<Filter>("all");
+  const [now] = useState(() => Date.now());
+  const counts = countByFilter(listings, now);
+  const shown = filter === "all" ? listings : listings.filter((l) => classify(l, now) === filter);
 
   async function remove(id: string) {
     if (!confirm("このメモを消しますか？")) return;
@@ -29,8 +34,24 @@ export function LibraryList({ listings }: { listings: ArchiveRecord[] }) {
   }
 
   return (
+    <div className="space-y-3">
+    <div className="flex gap-2">
+      {([["all", "すべて"], ["live", "出品中"], ["ended", "終了"]] as const).map(([k, label]) => (
+        <button
+          key={k}
+          type="button"
+          onClick={() => setFilter(k)}
+          className={`rounded-full border px-3 py-1.5 text-sm font-bold ${filter === k ? "border-[#ffdc00] bg-[#ffdc00] text-black" : "border-border bg-card text-muted"}`}
+        >
+          {label} {counts[k]}
+        </button>
+      ))}
+    </div>
+    {shown.length === 0 ? (
+      <div className="rounded-xl border border-dashed border-border bg-card px-5 py-8 text-center text-sm text-muted">該当するものはありません。</div>
+    ) : null}
     <ul className="space-y-3">
-      {listings.map((item) => {
+      {shown.map((item) => {
         const first = item.photos[0];
         const thumb = first?.key ? `/api/photo/${item.id}/0` : first?.url;
         return (
@@ -78,6 +99,7 @@ export function LibraryList({ listings }: { listings: ArchiveRecord[] }) {
         );
       })}
     </ul>
+    </div>
   );
 }
 

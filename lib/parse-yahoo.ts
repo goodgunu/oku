@@ -53,17 +53,22 @@ function readNextData($: CheerioRoot): NextItem | null {
   }
 }
 
+export function htmlToText(html: string): string {
+  const $ = cheerio.load(`<div id="r">${html.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li|tr|h[1-6])>/gi, "$&\n")}</div>`);
+  $("script, style").remove();
+  return $("#r").text();
+}
+
 function descriptionFromItem(item: NextItem): string {
+  // descriptionHtml が全文。description 配列は末尾が「...」で切れていることがある。
+  if (item.descriptionHtml && item.descriptionHtml.trim()) {
+    return cleanText(htmlToText(item.descriptionHtml));
+  }
   if (Array.isArray(item.description)) {
-    return cleanText(item.description.filter(Boolean).join("\n"));
+    return cleanText(item.description.filter((x) => x != null).join("\n"));
   }
   if (typeof item.description === "string" && item.description.trim()) {
     return cleanText(item.description);
-  }
-  if (item.descriptionHtml) {
-    const $ = cheerio.load(item.descriptionHtml);
-    $("script, style").remove();
-    return cleanText($.root().text()).slice(0, 4000);
   }
   return "";
 }

@@ -46,4 +46,17 @@ describe("parseYahooHtml", () => {
     const result = parseYahooHtml("", "https://auctions.yahoo.co.jp/jp/auction/h1248094934");
     assert.equal(result.status, "error");
   });
+
+  it("keeps the full long description (descriptionHtml over truncated description)", () => {
+    const html = readFileSync(path.join(fixtures, "yahoo-long-description.html"), "utf8");
+    const result = parseYahooHtml(html, "https://auctions.yahoo.co.jp/jp/auction/b1243771302");
+    assert.notEqual(result.status, "error");
+    if (result.status === "error") return;
+    const d = result.listing.description;
+    assert.ok(d.length > 4000, `length ${d.length}`);
+    assert.ok(d.endsWith("最後の行です。"));
+    assert.ok(!d.includes("..."));
+    assert.ok(d.includes("行1：") && d.includes("行120："));
+    assert.ok(d.split("\n").length > 100);
+  });
 });

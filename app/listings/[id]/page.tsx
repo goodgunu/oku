@@ -71,13 +71,13 @@ export default async function ListingPage({ params }: Props) {
             {listing.photos.map((photo, index) => (
               <a
                 key={`${photo.url}-${index}`}
-                href={photo.url}
+                href={photo.key ? `/api/photo/${listing.id}/${index}` : photo.url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="overflow-hidden rounded-xl border border-border bg-card"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={photo.url} alt={photo.caption || ""} className="aspect-square w-full object-cover" />
+                <img src={photo.key ? `/api/photo/${listing.id}/${index}` : photo.url} alt={photo.caption || ""} className="aspect-square w-full object-cover" />
               </a>
             ))}
           </div>

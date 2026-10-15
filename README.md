@@ -37,6 +37,7 @@ npm run build     # 本番ビルド
 | `LINE_CHANNEL_SECRET` | LINE Messaging API のチャネルシークレット（署名検証） |
 | `LINE_CHANNEL_ACCESS_TOKEN` | 返信用アクセストークン |
 | `OKU_DATA_DIR` | 保存ディレクトリ（省略時 `./.data`） |
+| `R2_ACCOUNT_ID` / `R2_BUCKET` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` | Cloudflare R2。4つ揃うと記録（`records/me/<id>.json`）と写真（`photos/<id>/<番号>.<拡張子>`）を R2 に保存。未設定なら `.data` |
 
 ## LINE 連携（任意）
 
@@ -51,11 +52,10 @@ npm run build     # 本番ビルド
 
 - Next.js App Router + TypeScript + Tailwind CSS v4
 - パーサは出品ページの `__NEXT_DATA__`（`item.detail.item`）を優先し、無いとき OGP にフォールバック
-- 写真は元URLをそのまま保存（再ホストは未実装）
+- R2 設定時は保存時に写真（最大20枚・1枚10MBまで）をダウンロードして R2 に保存し、`/api/photo/<id>/<番号>` から表示。失敗した写真は元URLのまま
 
 ## 今後（のこすとくっつけるとき）
 
 - 認証（Clerk など）とユーザー別ストア
-- 写真の永続化（Vercel Blob など）
 - 価格の再チェック / 比較UI
 - 「のこす」本体への統合

@@ -31,7 +31,8 @@ export function LibraryList({ listings }: { listings: ArchiveRecord[] }) {
   return (
     <ul className="space-y-3">
       {listings.map((item) => {
-        const thumb = item.photos[0]?.url;
+        const first = item.photos[0];
+        const thumb = first?.key ? `/api/photo/${item.id}/0` : first?.url;
         return (
           <li
             key={item.id}

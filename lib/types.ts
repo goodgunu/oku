@@ -1,6 +1,8 @@
 export type ParsedPhoto = {
   url: string;
   caption: string;
+  /** R2 に保存した写真のキー（保存済みのときだけ） */
+  key?: string;
 };
 
 export type ParsedListing = {

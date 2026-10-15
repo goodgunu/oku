@@ -46,12 +46,21 @@ export function buildSavedMessage(
           },
         }
       : {}),
+    header: {
+      type: "box",
+      layout: "vertical",
+      paddingAll: "12px",
+      backgroundColor: "#ffdc00",
+      contents: [
+        { type: "text", text: "おく", weight: "bold", size: "sm", color: "#111111" },
+      ],
+    },
     body: {
       type: "box",
       layout: "vertical",
       spacing: "sm",
       contents: [
-        { type: "text", text: headline, size: "xs", color: "#888888" },
+        { type: "text", text: headline, size: "xs", color: "#666666" },
         { type: "text", text: record.title.slice(0, 200), weight: "bold", wrap: true },
         ...rows.map((r) => ({ type: "text", text: r, size: "sm", wrap: true })),
       ],
@@ -63,6 +72,7 @@ export function buildSavedMessage(
         {
           type: "button",
           style: "primary",
+          color: "#ffdc00",
           action: { type: "uri", label: "おくで見る", uri: link },
         },
       ],

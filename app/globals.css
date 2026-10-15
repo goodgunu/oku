@@ -1,29 +1,32 @@
 @import "tailwindcss";
 
 :root {
-  --violet: #6b4de6;
-  --violet-ink: #3d2a9e;
-  --live: #157a3a;
-  --ended: #9a3412;
-  --background: #f4f2fb;
-  --foreground: #1c1917;
+  /* Yahoo!オークション風: ブランド黄 + 黒アクセント */
+  --yahoo: #ffdc00;
+  --yahoo-deep: #f5c400;
+  --ink: #111111;
+  --live: #008a00;
+  --ended: #c62828;
+  --background: #f7f7f7;
+  --foreground: #111111;
   --card: #ffffff;
-  --muted: #6b6560;
-  --border: #e4dff2;
+  --muted: #666666;
+  --border: #e5e5e5;
 }
 
 @theme inline {
+  --color-yahoo: var(--yahoo);
+  --color-yahoo-deep: var(--yahoo-deep);
+  --color-ink: var(--ink);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-muted: var(--muted);
   --color-border: var(--border);
-  --color-violet: var(--violet);
-  --color-violet-ink: var(--violet-ink);
   --color-live: var(--live);
   --color-ended: var(--ended);
-  --font-sans: "Zen Kaku Gothic New", "Hiragino Sans", "Noto Sans JP", sans-serif;
-  --font-display: "Shippori Mincho", "Hiragino Mincho ProN", serif;
+  --font-sans: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+    "Yu Gothic", Meiryo, system-ui, sans-serif;
 }
 
 body {

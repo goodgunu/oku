@@ -11,18 +11,18 @@ export default async function HomePage() {
   );
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <ArchiveForm />
       <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-violet-ink">ライブラリ</h2>
-          <span className="text-xs text-muted">{listings.length}件</span>
+        <div className="flex items-baseline justify-between border-b-2 border-yahoo pb-2">
+          <h2 className="text-lg font-bold text-ink">ライブラリ</h2>
+          <span className="text-xs font-medium text-muted">{listings.length}件</span>
         </div>
         <LibraryList listings={listings} />
       </section>
-      <section className="rounded-2xl border border-border bg-card/80 p-4 text-sm text-muted">
-        <p className="font-medium text-violet-ink">LINE連携</p>
-        <p className="mt-1">
+      <section className="rounded-xl border border-border bg-card p-4 text-sm text-muted shadow-sm">
+        <p className="font-bold text-ink">LINE連携</p>
+        <p className="mt-1 leading-relaxed">
           {lineReady
             ? "LINE Webhook が設定済みです。出品URLを公式アカウントに送ると保存します。"
             : "LINE_CHANNEL_SECRET と LINE_CHANNEL_ACCESS_TOKEN を入れると、LINEからURL共有でおけます。"}

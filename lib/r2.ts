@@ -1,4 +1,5 @@
 import {
+  CopyObjectCommand,
   DeleteObjectsCommand,
   GetObjectCommand,
   ListObjectsV2Command,
@@ -31,12 +32,21 @@ function s3(): S3Client {
 }
 const bucket = () => process.env.R2_BUCKET as string;
 
-export function recordKey(id: string): string {
-  return `records/me/${id.toLowerCase()}.json`;
+export function recordKey(folder: string, id: string): string {
+  return `records/${folder}/${id.toLowerCase()}.json`;
 }
 
-export function photoKey(id: string, index: number, ext: string): string {
-  return `photos/${id.toLowerCase()}/${index}.${ext}`;
+export function photoKey(folder: string, id: string, index: number, ext: string): string {
+  return `photos/${folder}/${id.toLowerCase()}/${index}.${ext}`;
+}
+
+export async function copyR2Object(from: string, to: string): Promise<boolean> {
+  try {
+    await s3().send(new CopyObjectCommand({ Bucket: bucket(), Key: to, CopySource: `${bucket()}/${from}` }));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function extFromContentType(type: string | null): string | null {
@@ -130,6 +140,7 @@ async function downloadPhoto(url: string): Promise<{ data: Buffer; ext: string }
  * 既に保存済みの同じURLは再ダウンロードしない。
  */
 export async function archivePhotos(
+  folder: string,
   id: string,
   photos: ParsedPhoto[],
   previous?: ParsedPhoto[],
@@ -139,7 +150,7 @@ export async function archivePhotos(
   for (let i = 0; i < photos.length; i++) {
     const photo = photos[i];
     const prev = prevByUrl.get(photo.url);
-    if (prev?.key && prev.key === photoKeyAt(prev.key, id, i)) {
+    if (prev?.key && prev.key === photoKeyAt(prev.key, folder, id, i)) {
       out.push({ ...photo, key: prev.key });
       continue;
     }
@@ -152,7 +163,7 @@ export async function archivePhotos(
       out.push({ url: photo.url, caption: photo.caption });
       continue;
     }
-    const key = photoKey(id, i, dl.ext);
+    const key = photoKey(folder, id, i, dl.ext);
     try {
       await s3().send(
         new PutObjectCommand({ Bucket: bucket(), Key: key, Body: dl.data, ContentType: dl.ext === "jpg" ? "image/jpeg" : `image/${dl.ext}` }),
@@ -165,6 +176,6 @@ export async function archivePhotos(
   return out;
 }
 
-function photoKeyAt(key: string, id: string, index: number): string {
-  return key.startsWith(`photos/${id.toLowerCase()}/${index}.`) ? key : "";
+function photoKeyAt(key: string, folder: string, id: string, index: number): string {
+  return key.startsWith(`photos/${folder}/${id.toLowerCase()}/${index}.`) ? key : "";
 }

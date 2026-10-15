@@ -1,7 +1,9 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { fetchYahooListing } from "@/lib/fetch-listing";
-import { getRecord, saveListing } from "@/lib/store";
-import { baseUrl, buildSavedMessage, type LineMessage } from "@/lib/line-message";
+import { LEGACY_FOLDER, clerkEnabled, userFolder } from "@/lib/account";
+import { baseUrl, buildConnectMessage, type LineMessage } from "@/lib/line-message";
+import { createLineConnectLink } from "@/lib/line-connect-code";
+import { linkedEmail } from "@/lib/line-link";
+import { saveAndReply } from "@/lib/line-save";
 import { extractYahooUrl } from "@/lib/yahoo-url";
 
 export const maxDuration = 60;
@@ -79,14 +81,20 @@ async function handleEvent(event: LineEvent, origin: string): Promise<LineMessag
     ];
   }
 
-  const { parsed } = await fetchYahooListing(canonical.url);
-  if (parsed.status === "error") {
-    return [{ type: "text", text: `保存できませんでした。\n${parsed.message}` }];
+  // ログインが有効なら、LINEとGoogleアカウントの連携が必要
+  let folder = LEGACY_FOLDER;
+  if (clerkEnabled()) {
+    const lineUserId = event.source?.userId || "";
+    const email = lineUserId ? await linkedEmail(lineUserId) : null;
+    if (!email) {
+      if (!lineUserId) return [{ type: "text", text: "このトークでは連携できません。1対1のトークで送ってください。" }];
+      const link = await createLineConnectLink(origin, lineUserId, canonical.url);
+      return buildConnectMessage(link);
+    }
+    folder = userFolder(email);
   }
 
-  const alreadySaved = Boolean(await getRecord(parsed.listing.id));
-  const record = await saveListing(parsed.listing);
-  return buildSavedMessage(record, { origin, ended: parsed.status === "ended", alreadySaved });
+  return (await saveAndReply({ folder, url: canonical.url, origin })).messages;
 }
 
 function validLineSignature(body: string, secret: string, signature: string): boolean {

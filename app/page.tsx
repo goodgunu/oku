@@ -1,11 +1,15 @@
 import { ArchiveForm } from "@/components/archive-form";
 import { LibraryList } from "@/components/library-list";
+import { GoogleSignIn } from "@/components/google-sign-in";
+import { currentUser } from "@/lib/current-user";
 import { listRecords } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const listings = await listRecords();
+  const user = await currentUser();
+  if (!user) return <GoogleSignIn />;
+  const listings = await listRecords(user.folder);
   const lineReady = Boolean(
     process.env.LINE_CHANNEL_SECRET && process.env.LINE_CHANNEL_ACCESS_TOKEN,
   );

@@ -1,9 +1,12 @@
+import { currentUser, unauthorized } from "@/lib/current-user";
 import { fetchYahooListing } from "@/lib/fetch-listing";
 import { saveListing } from "@/lib/store";
 
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
+  const user = await currentUser();
+  if (!user) return unauthorized();
   try {
     let body: { url?: unknown };
     try {
@@ -25,7 +28,7 @@ export async function POST(request: Request) {
       return Response.json(parsed, { status: httpStatus });
     }
 
-    const record = await saveListing(parsed.listing);
+    const record = await saveListing(user.folder, parsed.listing);
     return Response.json(
       { status: parsed.status, listing: parsed.listing, record },
       { status: 200 },

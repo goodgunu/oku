@@ -1,6 +1,7 @@
 import { ArchiveForm } from "@/components/archive-form";
 import { LibraryList } from "@/components/library-list";
 import { GoogleSignIn } from "@/components/google-sign-in";
+import { LineAddCard } from "@/components/line-add-card";
 import { currentUser } from "@/lib/current-user";
 import { listRecords } from "@/lib/store";
 
@@ -8,14 +9,18 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const user = await currentUser();
-  if (!user) return <GoogleSignIn />;
+  if (!user)
+    return (
+      <div className="space-y-6">
+        <LineAddCard />
+        <GoogleSignIn />
+      </div>
+    );
   const listings = await listRecords(user.folder);
-  const lineReady = Boolean(
-    process.env.LINE_CHANNEL_SECRET && process.env.LINE_CHANNEL_ACCESS_TOKEN,
-  );
 
   return (
     <div className="space-y-6">
+      <LineAddCard />
       <ArchiveForm />
       <section className="space-y-3">
         <div className="flex items-baseline justify-between border-b-2 border-yahoo pb-2">
@@ -23,14 +28,6 @@ export default async function HomePage() {
           <span className="text-xs font-medium text-muted">{listings.length}件</span>
         </div>
         <LibraryList listings={listings} />
-      </section>
-      <section className="rounded-xl border border-border bg-card p-4 text-sm text-muted shadow-sm">
-        <p className="font-bold text-ink">LINE連携</p>
-        <p className="mt-1 leading-relaxed">
-          {lineReady
-            ? "LINE Webhook が設定済みです。出品URLを公式アカウントに送ると保存します。"
-            : "LINE_CHANNEL_SECRET と LINE_CHANNEL_ACCESS_TOKEN を入れると、LINEからURL共有でおけます。"}
-        </p>
       </section>
     </div>
   );

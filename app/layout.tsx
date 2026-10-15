@@ -43,9 +43,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </header>
         <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-3xl flex-col px-4 py-6 sm:px-6 sm:py-8">
           <main className="flex-1">{children}</main>
-          <footer className="mt-10 border-t border-border pt-4 text-xs text-muted">
-            個人利用向けのメモアプリです。Yahoo!オークション公式ではありません。
-          </footer>
         </div>
       </body>
     </html>

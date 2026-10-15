@@ -9,25 +9,26 @@ export function GoogleSignIn({ linking = false }: { linking?: boolean }) {
   const [notice, setNotice] = useState("");
   const ready = fetchStatus !== "fetching";
 
-  async function start() {
+  async function start(strategy: "oauth_google" | "oauth_line" = "oauth_google") {
     if (!ready || busy) return;
+    const label = strategy === "oauth_line" ? "LINE" : "Google";
     setBusy(true);
     setNotice("");
     try {
       const here = `${window.location.pathname}${window.location.search}`;
       const result = await signIn.sso({
-        strategy: "oauth_google",
+        strategy,
         redirectUrl: here.startsWith("/sso-callback") ? "/" : here,
         redirectCallbackUrl: "/sso-callback",
-        oidcPrompt: "select_account",
+        ...(strategy === "oauth_google" ? { oidcPrompt: "select_account" as const } : {}),
       });
       if (result.error) {
         setBusy(false);
-        setNotice(result.error.message || "Googleのログインを開始できませんでした。");
+        setNotice(result.error.message || `${label}のログインを開始できませんでした。`);
       }
     } catch (error) {
       setBusy(false);
-      setNotice(error instanceof Error ? error.message : "Googleのログインを開始できませんでした。");
+      setNotice(error instanceof Error ? error.message : `${label}のログインを開始できませんでした。`);
     }
   }
 
@@ -41,11 +42,19 @@ export function GoogleSignIn({ linking = false }: { linking?: boolean }) {
       </p>
       <button
         type="button"
-        onClick={() => void start()}
+        onClick={() => void start("oauth_google")}
         disabled={!ready || busy}
         className="flex h-12 w-full items-center justify-center gap-3 rounded-full bg-yahoo text-base font-bold text-black shadow-sm disabled:opacity-60"
       >
-        {busy ? "Googleを開いています" : "Googleで続ける"}
+        {busy ? "開いています" : "Googleで続ける"}
+      </button>
+      <button
+        type="button"
+        onClick={() => void start("oauth_line")}
+        disabled={!ready || busy}
+        className="flex h-12 w-full items-center justify-center gap-3 rounded-full bg-[#06C755] text-base font-bold text-white shadow-sm disabled:opacity-60"
+      >
+        LINEで続ける
       </button>
       {notice && <p className="text-sm text-red-600">{notice}</p>}
     </div>

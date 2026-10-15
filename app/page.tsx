@@ -1,21 +1,16 @@
 import { ArchiveForm } from "@/components/archive-form";
 import { LibraryList } from "@/components/library-list";
-import { GoogleSignIn } from "@/components/google-sign-in";
+import { LoginGate } from "@/components/login-gate";
 import { LineAddCard } from "@/components/line-add-card";
-import { currentUser } from "@/lib/current-user";
+import { identity } from "@/lib/current-user";
 import { listRecords } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const user = await currentUser();
-  if (!user)
-    return (
-      <div className="space-y-6">
-        <GoogleSignIn />
-        <LineAddCard />
-      </div>
-    );
+  const id = await identity();
+  if (id.state !== "ok") return <LoginGate state={id.state} withLineCard />;
+  const user = id.user;
   const listings = await listRecords(user.folder);
 
   return (

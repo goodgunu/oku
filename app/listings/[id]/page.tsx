@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PhotoGallery } from "@/components/photo-lightbox";
 import { formatYen } from "@/lib/format";
-import { GoogleSignIn } from "@/components/google-sign-in";
-import { currentUser } from "@/lib/current-user";
+import { LoginGate } from "@/components/login-gate";
+import { identity } from "@/lib/current-user";
 import { getRecord } from "@/lib/store";
 import { isYahooListingId } from "@/lib/yahoo-url";
 
@@ -14,8 +14,9 @@ type Props = { params: Promise<{ id: string }> };
 export default async function ListingPage({ params }: Props) {
   const { id } = await params;
   if (!isYahooListingId(id)) notFound();
-  const user = await currentUser();
-  if (!user) return <GoogleSignIn />;
+  const who = await identity();
+  if (who.state !== "ok") return <LoginGate state={who.state} />;
+  const user = who.user;
   const listing = await getRecord(user.folder, id);
   if (!listing) notFound();
 

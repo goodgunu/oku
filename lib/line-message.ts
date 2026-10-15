@@ -93,7 +93,7 @@ export function buildSavedMessage(
 
 /** 未連携の人に返す「つなぐ」カード（黄色 #ffdc00） */
 export function buildConnectMessage(link: string): LineMessage[] {
-  const altText = `おくとつなぎます。下のリンクをひらいて、Googleでログインしてください。\n${link}`;
+  const altText = `おくとつなぎます。下のリンクをひらいて、ログインしてください。\n${link}`;
   return [
     {
       type: "flex",
@@ -112,7 +112,7 @@ export function buildConnectMessage(link: string): LineMessage[] {
           layout: "vertical",
           spacing: "sm",
           contents: [
-            { type: "text", text: "最初に1回だけ、Googleとつなぎます", weight: "bold", wrap: true },
+            { type: "text", text: "最初に1回だけ、ログインして おく とつなぎます", weight: "bold", wrap: true },
             {
               type: "text",
               text: "つなぐと、このURLが保存されます。次からは送るだけで、自分のライブラリに入ります。（30分以内にひらいてください）",
@@ -132,9 +132,9 @@ export function buildConnectMessage(link: string): LineMessage[] {
               backgroundColor: "#ffdc00",
               cornerRadius: "md",
               paddingAll: "12px",
-              action: { type: "uri", label: "Googleでつなぐ", uri: link },
+              action: { type: "uri", label: "ログインしてつなぐ", uri: link },
               contents: [
-                { type: "text", text: "Googleでつなぐ", color: "#000000", weight: "bold", align: "center" },
+                { type: "text", text: "ログインしてつなぐ", color: "#000000", weight: "bold", align: "center" },
               ],
             },
           ],

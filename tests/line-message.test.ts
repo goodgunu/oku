@@ -31,3 +31,10 @@ test("header has no おく text but keeps yellow strip", () => {
   assert.ok(!h.includes("おく"));
   assert.ok(h.includes("#ffdc00"));
 });
+
+test("connect message is not Google specific", async () => {
+  const { buildConnectMessage } = await import("../lib/line-message");
+  const json = JSON.stringify(buildConnectMessage("https://x.test/c"));
+  assert.ok(json.includes("ログインしてつなぐ"));
+  assert.ok(!json.includes("Google"));
+});

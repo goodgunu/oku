@@ -65,7 +65,7 @@ export function ArchiveForm() {
         <button
           type="submit"
           disabled={busy}
-          className="rounded-lg bg-ink px-6 py-2.5 text-sm font-bold text-yahoo hover:bg-black disabled:opacity-60"
+          className="rounded-lg bg-yahoo px-6 py-2.5 text-sm font-bold text-ink hover:bg-yahoo-deep disabled:opacity-60"
         >
           {busy ? "おくっています…" : "おく"}
         </button>

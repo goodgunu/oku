@@ -18,6 +18,9 @@ describe("parseYahooHtml", () => {
     assert.equal(result.listing.priceYen, 9337);
     assert.equal(result.listing.availability, "live");
     assert.equal(result.listing.seller, "ぐっぷらドットコム");
+    assert.equal(result.listing.prefecture, "福岡県");
+    assert.match(result.listing.shipping, /送料無料/);
+    assert.match(result.listing.shipping, /ゆうパック/);
     assert.ok(result.listing.photos.length >= 1);
     assert.ok(result.listing.endTime.includes("2026-10-15"));
   });
@@ -28,6 +31,9 @@ describe("parseYahooHtml", () => {
     assert.equal(result.status, "ended");
     if (result.status !== "ended") return;
     assert.equal(result.listing.id, "j1247725357");
+    assert.equal(result.listing.prefecture, "広島県");
+    assert.match(result.listing.shipping, /落札者負担/);
+    assert.match(result.listing.shipping, /ヤマト/);
     assert.equal(result.listing.availability, "ended");
     assert.equal(result.listing.priceYen, 7500);
   });

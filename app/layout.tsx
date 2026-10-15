@@ -19,15 +19,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ja" className="h-full antialiased">
       <body className="min-h-full bg-background text-foreground">
         <header className="border-b border-black/10 bg-yahoo">
-          <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+          <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-2 sm:px-6 sm:py-3">
             <Link href="/" className="flex items-center gap-2" aria-label="おく ホーム">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="/logo.png"
                 alt="おく"
-                className="h-9 w-auto sm:h-11"
-                width={160}
-                height={106}
+                className="h-[4.5rem] w-auto sm:h-24"
+                width={320}
+                height={212}
               />
             </Link>
             <p className="hidden text-xs font-medium text-ink/70 sm:block">ヤフオク個人メモ</p>

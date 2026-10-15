@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { PhotoGallery } from "@/components/photo-lightbox";
 import { formatYen } from "@/lib/format";
 import { getRecord } from "@/lib/store";
 import { isYahooListingId } from "@/lib/yahoo-url";
@@ -20,6 +21,11 @@ export default async function ListingPage({ params }: Props) {
       : listing.availability === "ended"
         ? { label: "終了", className: "bg-ended text-white" }
         : { label: "不明", className: "bg-border text-muted" };
+
+  const photos = listing.photos.map((photo, index) => ({
+    src: photo.key ? `/api/photo/${listing.id}/${index}` : photo.url,
+    alt: photo.caption || "",
+  }));
 
   return (
     <article className="space-y-6">
@@ -45,6 +51,8 @@ export default async function ListingPage({ params }: Props) {
         <Fact label="入札" value={listing.bidCount != null ? `${listing.bidCount}件` : "—"} />
         <Fact label="即決" value={listing.buyNowYen != null ? formatYen(listing.buyNowYen) : "—"} />
         <Fact label="出品者" value={listing.seller || "—"} />
+        <Fact label="出品地域" value={listing.prefecture || "—"} />
+        <Fact label="送料" value={listing.shipping || "—"} />
         <Fact label="状態" value={listing.condition || "—"} />
         <Fact label="終了" value={listing.endTimeLabel || "—"} />
         <Fact
@@ -62,32 +70,12 @@ export default async function ListingPage({ params }: Props) {
         />
       </dl>
 
-      {listing.photos.length > 0 && (
+      {photos.length > 0 && (
         <section className="space-y-3">
           <h2 className="border-b-2 border-yahoo pb-1 text-sm font-bold text-ink">
-            写真（{listing.photos.length}）
+            写真（{photos.length}）
           </h2>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-            {listing.photos.map((photo, index) => {
-              const src = photo.key ? `/api/photo/${listing.id}/${index}` : photo.url;
-              return (
-                <a
-                  key={`${photo.url}-${index}`}
-                  href={src}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="overflow-hidden rounded-lg border border-border bg-card shadow-sm"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={src}
-                    alt={photo.caption || ""}
-                    className="aspect-square w-full object-cover"
-                  />
-                </a>
-              );
-            })}
-          </div>
+          <PhotoGallery photos={photos} />
         </section>
       )}
 

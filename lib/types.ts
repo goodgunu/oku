@@ -17,6 +17,8 @@ export type ParsedListing = {
   endTime: string;
   endTimeLabel: string;
   condition: string;
+  prefecture: string;
+  shipping: string;
   description: string;
   buyNowYen: number | null;
   photos: ParsedPhoto[];
@@ -40,6 +42,8 @@ export type ArchiveRecord = {
   endTime: string;
   endTimeLabel: string;
   condition: string;
+  prefecture: string;
+  shipping: string;
   description: string;
   buyNowYen: number | null;
   photos: ParsedPhoto[];

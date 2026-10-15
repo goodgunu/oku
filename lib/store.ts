@@ -47,6 +47,8 @@ export function listingToRecord(listing: ParsedListing, existing?: ArchiveRecord
     endTime: listing.endTime,
     endTimeLabel: listing.endTimeLabel,
     condition: listing.condition,
+    prefecture: listing.prefecture,
+    shipping: listing.shipping,
     description: listing.description,
     buyNowYen: listing.buyNowYen,
     photos: listing.photos,

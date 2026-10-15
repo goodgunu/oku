@@ -23,6 +23,12 @@ type NextItem = {
   seller?: {
     displayName?: string;
     aucUserId?: string;
+    location?: { prefecture?: string; prefCode?: string };
+  };
+  chargeForShipping?: string;
+  shipScheduleName?: string;
+  shipping?: {
+    methods?: { id?: string; name?: string; isFlatFee?: boolean }[];
   };
   img?: { image?: string; thumbnail?: string; caption?: string }[];
 };
@@ -85,6 +91,29 @@ function photosFromItem(item: NextItem): ParsedPhoto[] {
   return photos;
 }
 
+
+function prefectureFromItem(item: NextItem): string {
+  return cleanText(item.seller?.location?.prefecture || "");
+}
+
+/** 送料の表示文言。金額はYahooが別APIのことが多く、負担区分と配送方法を優先する。 */
+export function shippingFromItem(item: NextItem): string {
+  const charge = String(item.chargeForShipping || "").toLowerCase();
+  let who = "";
+  if (charge === "seller") who = "送料無料（出品者負担）";
+  else if (charge === "winner" || charge === "buyer") who = "落札者負担";
+  else if (charge) who = charge;
+
+  const methods = (item.shipping?.methods || [])
+    .map((m) => cleanText(m.name || ""))
+    .filter(Boolean);
+  const method = methods.length ? methods.join("、") : "";
+  const schedule = cleanText(item.shipScheduleName || "");
+
+  const parts = [who, method, schedule].filter(Boolean);
+  return parts.join(" · ") || "";
+}
+
 function listingFromNext(item: NextItem, sourceUrl: string): ParsedListing | null {
   const id = (item.auctionId || "").toLowerCase();
   if (!id) return null;
@@ -116,6 +145,8 @@ function listingFromNext(item: NextItem, sourceUrl: string): ParsedListing | nul
     endTime: item.endTime || "",
     endTimeLabel: item.formattedEndTime || item.endTime || "",
     condition: cleanText(item.conditionName || ""),
+    prefecture: prefectureFromItem(item),
+    shipping: shippingFromItem(item),
     description: descriptionFromItem(item),
     buyNowYen,
     photos: photosFromItem(item),
@@ -154,6 +185,8 @@ function listingFromOg($: CheerioRoot, sourceUrl: string): ParsedListing | null 
     endTime: "",
     endTimeLabel: "",
     condition: "",
+    prefecture: "",
+    shipping: "",
     description,
     buyNowYen: null,
     photos: image ? [{ url: image, caption: "" }] : [],

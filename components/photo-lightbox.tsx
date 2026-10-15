@@ -7,36 +7,21 @@ type Photo = { src: string; alt?: string };
 export function PhotoGallery({ photos }: { photos: Photo[] }) {
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
-  const [offset, setOffset] = useState(0);
-  const [animating, setAnimating] = useState(false);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const dragX = useRef(0);
-  const [drag, setDrag] = useState(0);
 
   const close = useCallback(() => {
     setOpen(false);
-    setDrag(0);
-    setAnimating(false);
   }, []);
 
   const go = useCallback(
     (dir: 1 | -1) => {
-      if (animating || photos.length < 2) return;
+      if (photos.length < 2) return;
       const next = index + dir;
-      if (next < 0 || next >= photos.length) {
-        setDrag(0);
-        return;
-      }
-      setAnimating(true);
-      setOffset(dir);
-      window.setTimeout(() => {
-        setIndex(next);
-        setOffset(0);
-        setDrag(0);
-        setAnimating(false);
-      }, 280);
+      if (next < 0 || next >= photos.length) return;
+      setIndex(next);
     },
-    [animating, index, photos.length],
+    [index, photos.length],
   );
 
   useEffect(() => {
@@ -68,7 +53,6 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
     if (Math.abs(dx) > Math.abs(dy)) {
       e.preventDefault();
       dragX.current = dx;
-      setDrag(dx);
     }
   }
   function onTouchEnd() {
@@ -76,7 +60,6 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
     touchStart.current = null;
     if (dx < -60) go(1);
     else if (dx > 60) go(-1);
-    else setDrag(0);
   }
 
   return (
@@ -139,10 +122,6 @@ export function PhotoGallery({ photos }: { photos: Photo[] }) {
             )}
             <div
               className="flex h-full w-full items-center justify-center"
-              style={{
-                transform: `translateX(calc(${-offset * 100}% + ${drag}px))`,
-                transition: animating ? "transform 280ms cubic-bezier(0.22, 1, 0.36, 1)" : drag ? "none" : "transform 200ms ease-out",
-              }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img

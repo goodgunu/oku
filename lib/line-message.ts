@@ -70,10 +70,21 @@ export function buildSavedMessage(
       layout: "vertical",
       contents: [
         {
-          type: "button",
-          style: "primary",
-          color: "#ffdc00",
+          type: "box",
+          layout: "vertical",
+          backgroundColor: "#ffdc00",
+          cornerRadius: "md",
+          paddingAll: "12px",
           action: { type: "uri", label: "おくで見る", uri: link },
+          contents: [
+            {
+              type: "text",
+              text: "おくで見る",
+              color: "#000000",
+              weight: "bold",
+              align: "center",
+            },
+          ],
         },
       ],
     },

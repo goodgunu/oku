@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { ArchiveRecord } from "@/lib/types";
+import { sourceLabel } from "@/lib/source-labels";
 import { classify, countByFilter, type Filter } from "@/lib/classify";
 
 export function LibraryList({ listings }: { listings: ArchiveRecord[] }) {
@@ -73,15 +74,19 @@ export function LibraryList({ listings }: { listings: ArchiveRecord[] }) {
               <div className="min-w-0 flex-1">
                 <div className="mb-1 flex flex-wrap items-center gap-2">
                   <AvailabilityBadge value={item.availability} />
-                  <span className="text-[11px] text-muted">{item.id}</span>
+                  <span className="rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-bold text-ink/70">
+                    {sourceLabel(item.source)}
+                  </span>
                 </div>
                 <p className="line-clamp-2 text-sm font-bold leading-snug text-ink">{item.title}</p>
+                {item.priceLabel && item.priceLabel !== "—" ? (
                 <p className="mt-1.5 text-base font-bold text-ink">
                   {item.priceLabel}
                   {item.bidCount != null ? (
                     <span className="ml-2 text-xs font-medium text-muted">入札 {item.bidCount}</span>
                   ) : null}
                 </p>
+                ) : null}
                 {item.endTimeLabel && (
                   <p className="mt-0.5 text-xs text-muted">終了 {item.endTimeLabel}</p>
                 )}

@@ -1,11 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PhotoGallery } from "@/components/photo-lightbox";
+import { sourceLabel } from "@/lib/source-labels";
+import { MERCARI_NOTE } from "@/lib/sources/mercari";
 import { formatYen } from "@/lib/format";
 import { LoginGate } from "@/components/login-gate";
 import { identity } from "@/lib/current-user";
 import { getRecord } from "@/lib/store";
-import { isYahooListingId } from "@/lib/yahoo-url";
+import { isListingId } from "@/lib/sources";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +15,7 @@ type Props = { params: Promise<{ id: string }> };
 
 export default async function ListingPage({ params }: Props) {
   const { id } = await params;
-  if (!isYahooListingId(id)) notFound();
+  if (!isListingId(id)) notFound();
   const who = await identity();
   if (who.state !== "ok") return <LoginGate state={who.state} />;
   const user = who.user;
@@ -46,20 +48,40 @@ export default async function ListingPage({ params }: Props) {
           <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${badge.className}`}>
             {badge.label}
           </span>
+          <span className="rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-bold text-ink/70">
+            {sourceLabel(listing.source)}
+          </span>
           <span className="text-muted">{listing.id}</span>
         </div>
         <h1 className="text-xl font-bold leading-snug text-ink sm:text-2xl">{listing.title}</h1>
-        <p className="text-2xl font-bold text-ink sm:text-3xl">{listing.priceLabel}</p>
+        {listing.priceLabel && listing.priceLabel !== "—" ? (
+          <p className="text-2xl font-bold text-ink sm:text-3xl">
+            {listing.priceKind === "current_bid" ? (
+              <span className="mr-2 text-xs font-medium text-muted">現在価格</span>
+            ) : null}
+            {listing.priceLabel}
+          </p>
+        ) : null}
+        {listing.detailLevel === "partial" && listing.source === "mercari" ? (
+          <p className="rounded-lg bg-background px-3 py-2 text-xs text-muted">{MERCARI_NOTE}</p>
+        ) : null}
       </div>
 
       <dl className="grid grid-cols-2 gap-3 rounded-xl border border-border bg-card p-4 text-sm shadow-sm sm:grid-cols-3">
-        <Fact label="入札" value={listing.bidCount != null ? `${listing.bidCount}件` : "—"} />
-        <Fact label="即決" value={listing.buyNowYen != null ? formatYen(listing.buyNowYen) : "—"} />
-        <Fact label="出品者" value={listing.seller || "—"} />
-        <Fact label="出品地域" value={listing.prefecture || "—"} />
-        <Fact label="送料" value={listing.shipping || "—"} />
-        <Fact label="状態" value={listing.condition || "—"} />
-        <Fact label="終了" value={listing.endTimeLabel || "—"} />
+        {listing.bidCount != null && <Fact label="入札" value={`${listing.bidCount}件`} />}
+        {listing.buyNowYen != null && <Fact label="即決" value={formatYen(listing.buyNowYen)} />}
+        {listing.seller && <Fact label="出品者" value={listing.seller} />}
+        {listing.prefecture && <Fact label="出品地域" value={listing.prefecture} />}
+        {listing.shipping && <Fact label="送料・発送" value={listing.shipping} />}
+        {listing.condition && <Fact label="状態" value={listing.condition} />}
+        {listing.category && <Fact label="カテゴリ" value={listing.category} />}
+        {listing.endTimeLabel && <Fact label="終了" value={listing.endTimeLabel} />}
+        {listing.postedAt && (
+          <Fact
+            label="掲載"
+            value={new Date(listing.postedAt).toLocaleDateString("ja-JP", { timeZone: "Asia/Tokyo" })}
+          />
+        )}
         <Fact
           label="元ページ"
           value={
@@ -69,7 +91,7 @@ export default async function ListingPage({ params }: Props) {
               rel="noopener noreferrer"
               className="font-bold text-ink underline decoration-yahoo decoration-2 underline-offset-2 hover:text-black"
             >
-              ヤフオクで開く
+              {sourceLabel(listing.source)}で開く
             </a>
           }
         />

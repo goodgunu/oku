@@ -4,7 +4,7 @@ import { baseUrl, buildConnectMessage, type LineMessage } from "@/lib/line-messa
 import { createLineConnectLink } from "@/lib/line-connect-code";
 import { linkedEmail } from "@/lib/line-link";
 import { saveAndReply } from "@/lib/line-save";
-import { extractYahooUrl } from "@/lib/yahoo-url";
+import { extractListingUrl, supportedSiteLabels, unsupportedMessage } from "@/lib/sources";
 
 export const maxDuration = 60;
 
@@ -61,22 +61,22 @@ async function handleEvent(event: LineEvent, origin: string): Promise<LineMessag
     return [
       {
         type: "text",
-        text: "おくです。ヤフオクの出品ページURLを送ると、終了前に内容をメモとして残します。",
+        text: `おくです。出品ページのURLを送ると、内容をメモとして残します。\n対応: ${supportedSiteLabels()}`,
       },
     ];
   }
 
   if (event.type !== "message" || event.message?.type !== "text") {
-    return [{ type: "text", text: "ヤフオクの出品URLをテキストで送ってください。" }];
+    return [{ type: "text", text: `出品ページのURLをテキストで送ってください。\n対応: ${supportedSiteLabels()}` }];
   }
 
   const text = event.message.text || "";
-  const canonical = extractYahooUrl(text);
+  const canonical = extractListingUrl(text);
   if (!canonical) {
     return [
       {
         type: "text",
-        text: "ヤフオクの出品ページURLが見つかりませんでした。\n例: https://auctions.yahoo.co.jp/jp/auction/h1234567890",
+        text: `出品ページのURLが見つかりませんでした。\n${unsupportedMessage()}`,
       },
     ];
   }
@@ -88,13 +88,13 @@ async function handleEvent(event: LineEvent, origin: string): Promise<LineMessag
     const email = lineUserId ? await linkedEmail(lineUserId) : null;
     if (!email) {
       if (!lineUserId) return [{ type: "text", text: "このトークでは連携できません。1対1のトークで送ってください。" }];
-      const link = await createLineConnectLink(origin, lineUserId, canonical.url);
+      const link = await createLineConnectLink(origin, lineUserId, canonical.canonicalUrl);
       return buildConnectMessage(link);
     }
     folder = userFolder(email);
   }
 
-  return (await saveAndReply({ folder, url: canonical.url, origin })).messages;
+  return (await saveAndReply({ folder, url: canonical.canonicalUrl, origin })).messages;
 }
 
 function validLineSignature(body: string, secret: string, signature: string): boolean {

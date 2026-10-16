@@ -1,5 +1,5 @@
 import { currentUser, unauthorized } from "@/lib/current-user";
-import { fetchYahooListing } from "@/lib/fetch-listing";
+import { fetchListing, unsupportedMessage } from "@/lib/sources";
 import { saveListing } from "@/lib/store";
 
 export const maxDuration = 60;
@@ -17,12 +17,12 @@ export async function POST(request: Request) {
 
     if (typeof body.url !== "string") {
       return Response.json(
-        { status: "error", message: "ヤフオクの出品ページのURLを貼ってください。" },
+        { status: "error", message: unsupportedMessage() },
         { status: 400 },
       );
     }
 
-    const { parsed, httpStatus } = await fetchYahooListing(body.url);
+    const { parsed, httpStatus } = await fetchListing(body.url);
 
     if (parsed.status === "error") {
       return Response.json(parsed, { status: httpStatus });

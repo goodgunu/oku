@@ -119,7 +119,20 @@ export async function getR2Object(key: string) {
   }
 }
 
-async function downloadPhoto(url: string): Promise<{ data: Buffer; ext: string } | null> {
+function photoHostOk(url: string, hosts?: string[]): boolean {
+  if (!hosts) return true;
+  try {
+    const u = new URL(url);
+    if (u.protocol !== "https:" && u.protocol !== "http:") return false;
+    const h = u.hostname.toLowerCase();
+    return hosts.some((a) => h === a || h.endsWith(`.${a}`));
+  } catch {
+    return false;
+  }
+}
+
+async function downloadPhoto(url: string, hosts?: string[]): Promise<{ data: Buffer; ext: string } | null> {
+  if (!photoHostOk(url, hosts)) return null;
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
     if (!res.ok) return null;
@@ -144,6 +157,7 @@ export async function archivePhotos(
   id: string,
   photos: ParsedPhoto[],
   previous?: ParsedPhoto[],
+  allowedHosts?: string[],
 ): Promise<ParsedPhoto[]> {
   const prevByUrl = new Map((previous ?? []).filter((p) => p.key).map((p) => [p.url, p]));
   const out: ParsedPhoto[] = [];
@@ -158,7 +172,7 @@ export async function archivePhotos(
       out.push({ url: photo.url, caption: photo.caption });
       continue;
     }
-    const dl = await downloadPhoto(photo.url);
+    const dl = await downloadPhoto(photo.url, allowedHosts);
     if (!dl) {
       out.push({ url: photo.url, caption: photo.caption });
       continue;

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     default: "おく",
     template: "%s · おく",
   },
-  description: "ヤフオクの出品を、終了前に自分のメモとして残すアプリ。",
+  description: "ヤフオク・PayPayフリマ・ジモティー・メルカリの出品を、自分のメモとして残すアプリ。",
   icons: {
     icon: [{ url: "/favicon.png", type: "image/png" }, { url: "/icon.png", type: "image/png" }],
     apple: "/icon.png",
@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               />
             </Link>
             <div className="flex items-center gap-3">
-              <p className="hidden text-xs font-medium text-ink/70 sm:block">ヤフオク個人メモ</p>
+              <p className="hidden text-xs font-medium text-ink/70 sm:block">出品の個人メモ</p>
               {enabled && <AccountButton />}
             </div>
           </div>

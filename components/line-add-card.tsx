@@ -8,7 +8,7 @@ export async function LineAddCard() {
     <section className="rounded-2xl border border-[#ffdc00] bg-[#fff8d6] p-3">
       <div className="space-y-3 rounded-xl bg-white p-4">
         <p className="text-sm leading-relaxed text-ink">
-          公式LINE「おく」{id ? `（${id}）` : ""}を友だち追加すると、ヤフオクの共有から出品を送れます。
+          公式LINE「おく」{id ? `（${id}）` : ""}を友だち追加すると、出品ページのURLを送るだけで保存できます。
         </p>
         <a
           href={url}

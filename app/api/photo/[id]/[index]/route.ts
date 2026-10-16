@@ -2,7 +2,7 @@ import { isFolder, verifyPhoto } from "@/lib/account";
 import { currentUser } from "@/lib/current-user";
 import { getRecord } from "@/lib/store";
 import { getR2Object, isR2Enabled } from "@/lib/r2";
-import { isYahooListingId } from "@/lib/yahoo-url";
+import { isListingId } from "@/lib/sources";
 
 type Ctx = { params: Promise<{ id: string; index: string }> };
 
@@ -12,7 +12,7 @@ type Ctx = { params: Promise<{ id: string; index: string }> };
 export async function GET(request: Request, context: Ctx) {
   const { id, index } = await context.params;
   const i = Number(index);
-  if (!isR2Enabled() || !isYahooListingId(id) || !Number.isInteger(i) || i < 0) {
+  if (!isR2Enabled() || !isListingId(id) || !Number.isInteger(i) || i < 0) {
     return new Response("not found", { status: 404 });
   }
   const url = new URL(request.url);

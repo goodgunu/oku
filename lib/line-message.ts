@@ -1,4 +1,6 @@
 import { formatYen } from "@/lib/format";
+import { getSource } from "@/lib/sources";
+import { MERCARI_NOTE } from "@/lib/sources/mercari";
 import type { ArchiveRecord } from "@/lib/types";
 
 export type LineMessage = { type: "text"; text: string } | { type: "flex"; altText: string; contents: Record<string, unknown> };
@@ -20,8 +22,12 @@ export function buildSavedMessage(
 ): LineMessage[] {
   const link = `${opts.origin}/listings/${record.id}`;
   const label = [opts.ended ? "（終了済み）" : "", opts.alreadySaved ? "（保存済みなので更新しました）" : ""].join("");
+  const source = getSource(record.source);
+  const priceName = record.priceKind === "current_bid" || (!record.priceKind && source.id === "yahoo-auction") ? "現在価格" : "価格";
+  const partial = record.detailLevel === "partial";
   const rows = [
-    record.priceLabel ? `現在価格: ${record.priceLabel}` : "",
+    `サイト: ${source.label}`,
+    record.priceLabel && record.priceLabel !== "—" ? `${priceName}: ${record.priceLabel}` : "",
     record.bidCount != null ? `入札: ${record.bidCount}件` : "",
     record.seller ? `出品者: ${record.seller}` : "",
     record.endTimeLabel ? `終了: ${record.endTimeLabel}` : "",
@@ -61,6 +67,9 @@ export function buildSavedMessage(
         { type: "text", text: headline, size: "xs", color: "#666666" },
         { type: "text", text: record.title.slice(0, 200), weight: "bold", wrap: true },
         ...rows.map((r) => ({ type: "text", text: r, size: "sm", wrap: true })),
+        ...(partial && source.id === "mercari"
+          ? [{ type: "text", text: MERCARI_NOTE, size: "xs", color: "#888888", wrap: true }]
+          : []),
       ],
     },
     footer: {

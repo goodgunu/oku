@@ -1,7 +1,7 @@
 import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { ArchiveRecord, ParsedListing } from "@/lib/types";
-import { isYahooListingId } from "@/lib/yahoo-url";
+import { getSource, isListingId } from "@/lib/sources";
 import { LEGACY_FOLDER } from "@/lib/account";
 import { archivePhotos, copyR2Object, deleteR2Prefix, getR2Json, isR2Enabled, listR2Keys, putR2Json, recordKey } from "@/lib/r2";
 
@@ -42,10 +42,23 @@ export async function writeAppJson(key: string, value: unknown): Promise<void> {
   await writeFile(file, JSON.stringify(value, null, 2));
 }
 
+/** 古い保存データ（source なし）を ヤフオク として扱えるようにそろえる */
+export function normalizeRecord(r: ArchiveRecord): ArchiveRecord {
+  return {
+    ...r,
+    source: r.source || "yahoo-auction",
+    priceKind: r.priceKind || "current_bid",
+    detailLevel: r.detailLevel || "full",
+  };
+}
+
 export function listingToRecord(listing: ParsedListing, existing?: ArchiveRecord | null): ArchiveRecord {
   const now = new Date().toISOString();
   return {
     id: listing.id,
+    source: listing.source || "yahoo-auction",
+    priceKind: listing.priceKind || "current_bid",
+    detailLevel: listing.detailLevel || "full",
     sourceUrl: listing.sourceUrl,
     savedAt: existing?.savedAt || now,
     updatedAt: now,
@@ -64,6 +77,8 @@ export function listingToRecord(listing: ParsedListing, existing?: ArchiveRecord
     description: listing.description,
     buyNowYen: listing.buyNowYen,
     photos: listing.photos,
+    ...(listing.category ? { category: listing.category } : {}),
+    ...(listing.postedAt ? { postedAt: listing.postedAt } : {}),
     memo: existing?.memo || "",
   };
 }
@@ -74,6 +89,7 @@ export async function listRecords(folder: string): Promise<ArchiveRecord[]> {
     const all = await Promise.all(keys.filter((k) => k.endsWith(".json")).map((k) => getR2Json<ArchiveRecord>(k)));
     return all
       .filter((r): r is ArchiveRecord => Boolean(r?.id))
+      .map(normalizeRecord)
       .sort((a, b) => (a.savedAt < b.savedAt ? 1 : -1));
   }
   const dir = recordsDir(folder);
@@ -82,19 +98,21 @@ export async function listRecords(folder: string): Promise<ArchiveRecord[]> {
   for (const name of names) {
     if (!name.endsWith(".json")) continue;
     const record = await readJsonFile<ArchiveRecord>(path.join(dir, name));
-    if (record?.id) records.push(record);
+    if (record?.id) records.push(normalizeRecord(record));
   }
   return records.sort((a, b) => (a.savedAt < b.savedAt ? 1 : -1));
 }
 
 export async function getRecord(folder: string, id: string): Promise<ArchiveRecord | null> {
-  if (!isYahooListingId(id)) return null;
-  if (isR2Enabled()) return getR2Json<ArchiveRecord>(recordKey(folder, id));
-  return readJsonFile<ArchiveRecord>(recordPath(folder, id));
+  if (!isListingId(id)) return null;
+  const rec = isR2Enabled()
+    ? await getR2Json<ArchiveRecord>(recordKey(folder, id))
+    : await readJsonFile<ArchiveRecord>(recordPath(folder, id));
+  return rec ? normalizeRecord(rec) : null;
 }
 
 export async function putRecord(folder: string, record: ArchiveRecord): Promise<void> {
-  if (!isYahooListingId(record.id)) throw new Error("出品IDが不正です。");
+  if (!isListingId(record.id)) throw new Error("出品IDが不正です。");
   if (isR2Enabled()) {
     await putR2Json(recordKey(folder, record.id), record);
     return;
@@ -104,7 +122,7 @@ export async function putRecord(folder: string, record: ArchiveRecord): Promise<
 }
 
 export async function deleteRecord(folder: string, id: string): Promise<boolean> {
-  if (!isYahooListingId(id)) return false;
+  if (!isListingId(id)) return false;
   if (isR2Enabled()) {
     try {
       await deleteR2Prefix(`photos/${folder}/${id.toLowerCase()}/`);
@@ -127,7 +145,7 @@ export async function saveListing(folder: string, listing: ParsedListing): Promi
   const existing = await getRecord(folder, listing.id);
   const record = listingToRecord(listing, existing);
   if (isR2Enabled()) {
-    record.photos = await archivePhotos(folder, listing.id, listing.photos, existing?.photos);
+    record.photos = await archivePhotos(folder, listing.id, listing.photos, existing?.photos, getSource(listing.source).photoHosts);
   }
   await putRecord(folder, record);
   return record;
@@ -150,7 +168,7 @@ export async function adoptLegacyLibrary(folder: string): Promise<void> {
     const keys = (await listR2Keys(`records/${LEGACY_FOLDER}/`)).filter((k) => k.endsWith(".json"));
     for (const key of keys) {
       const record = await getR2Json<ArchiveRecord>(key);
-      if (!record?.id || !isYahooListingId(record.id)) continue;
+      if (!record?.id || !isListingId(record.id)) continue;
       const photos = [];
       for (const photo of record.photos ?? []) {
         if (photo.key && photo.key.startsWith(`photos/${record.id.toLowerCase()}/`)) {

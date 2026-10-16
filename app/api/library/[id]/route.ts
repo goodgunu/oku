@@ -1,6 +1,6 @@
 import { currentUser, unauthorized } from "@/lib/current-user";
 import { deleteRecord, getRecord } from "@/lib/store";
-import { isYahooListingId } from "@/lib/yahoo-url";
+import { isListingId } from "@/lib/sources";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -8,7 +8,7 @@ export async function GET(_request: Request, context: Ctx) {
   const user = await currentUser();
   if (!user) return unauthorized();
   const { id } = await context.params;
-  if (!isYahooListingId(id)) {
+  if (!isListingId(id)) {
     return Response.json({ message: "出品IDが不正です。" }, { status: 400 });
   }
   const listing = await getRecord(user.folder, id);
@@ -22,7 +22,7 @@ export async function DELETE(_request: Request, context: Ctx) {
   const user = await currentUser();
   if (!user) return unauthorized();
   const { id } = await context.params;
-  if (!isYahooListingId(id)) {
+  if (!isListingId(id)) {
     return Response.json({ message: "出品IDが不正です。" }, { status: 400 });
   }
   const existing = await getRecord(user.folder, id);

@@ -1,5 +1,5 @@
 import { photoUrl } from "@/lib/account";
-import { fetchYahooListing } from "@/lib/fetch-listing";
+import { fetchListing } from "@/lib/sources";
 import { buildSavedMessage, type LineMessage } from "@/lib/line-message";
 import { getRecord, saveListing } from "@/lib/store";
 import type { ArchiveRecord } from "@/lib/types";
@@ -8,7 +8,7 @@ export type SaveReply = { messages: LineMessage[]; record?: ArchiveRecord };
 
 /** URL を指定フォルダに保存して、LINE に返すメッセージを作る。 */
 export async function saveAndReply(opts: { folder: string; url: string; origin: string }): Promise<SaveReply> {
-  const { parsed } = await fetchYahooListing(opts.url);
+  const { parsed } = await fetchListing(opts.url);
   if (parsed.status === "error") {
     return { messages: [{ type: "text", text: `保存できませんでした。\n${parsed.message}` }] };
   }

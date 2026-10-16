@@ -73,7 +73,7 @@ export function ArchiveForm() {
       {message && <p className="mt-3 text-sm font-medium text-live">{message}</p>}
       {error && <p className="mt-3 text-sm font-medium text-ended">{error}</p>}
       <p className="mt-3 text-xs leading-relaxed text-muted">
-        出品が生きているうちにURLを貼ると、タイトル・価格・写真などをメモとして残します。対応: ヤフオク・PayPayフリマ・ジモティー・メルカリ（メルカリはタイトルと写真のみ）。
+        出品が生きているうちにURLを貼ると、タイトル・価格・写真などをメモとして残します。対応: ヤフオク・PayPayフリマ・ジモティー・メルカリ（メルカリは読み取れないとき、タイトルと写真のみ）。
       </p>
     </form>
   );

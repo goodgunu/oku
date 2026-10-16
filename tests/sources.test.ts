@@ -5,7 +5,7 @@ import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 import { extractListingUrl, isListingId, unsupportedMessage } from "../lib/sources";
 import { parseJmtyHtml } from "../lib/sources/jmty";
-import { cleanMercariTitle, parseMercariHtml } from "../lib/sources/mercari";
+import { cleanMercariTitle, parseMercariHtml, parseMercariRendered } from "../lib/sources/mercari";
 import { parsePaypayHtml } from "../lib/sources/paypay";
 import { prefectureFromEnum } from "../lib/sources/prefectures";
 import { classify } from "../lib/classify";
@@ -97,6 +97,31 @@ describe("jmty", () => {
 });
 
 describe("mercari", () => {
+  it("full mode from rendered page (sold)", () => {
+    const r = parseMercariRendered(fx("mercari-rendered-sold.html"), "https://jp.mercari.com/item/m83314221510");
+    assert.equal(r?.status, "ended");
+    if (!r || r.status === "error") return;
+    assert.equal(r.listing.detailLevel, "full");
+    assert.equal(r.listing.availability, "ended");
+    assert.equal(r.listing.priceYen, 1400);
+    assert.equal(r.listing.photos.length, 3);
+    assert.equal(r.listing.prefecture, "東京都");
+    assert.equal(r.listing.condition, "新品、未使用");
+    assert.equal(r.listing.seller, "WORLDWIDE vintage");
+    assert.match(r.listing.description, /PANINI/);
+  });
+  it("full mode live", () => {
+    const r = parseMercariRendered(fx("mercari-rendered-live.html"), "https://jp.mercari.com/item/m10930968847");
+    assert.equal(r?.status, "ok");
+    if (!r || r.status === "error") return;
+    assert.equal(r.listing.availability, "live");
+    assert.equal(r.listing.priceYen, 2000);
+    assert.equal(r.listing.photos.length, 5);
+    assert.equal(r.listing.prefecture, "高知県");
+  });
+  it("no JSON-LD returns null", () => {
+    assert.equal(parseMercariRendered("<html><body>ページが見つかりませんでした</body></html>", "https://jp.mercari.com/item/m1"), null);
+  });
   it("light mode title and first photo", () => {
     const r = parseMercariHtml(fx("mercari-ok.html"), "https://jp.mercari.com/item/m53988257465");
     assert.equal(r.status, "ok");

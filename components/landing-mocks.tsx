@@ -1,6 +1,6 @@
 const SAMPLE_ACTIVE = {
   site: "ヤフオク",
-  title: "美品 SONY α7 IV ILCE-7M4 ボディ 元箱・付属品完備 シャッター数少",
+  title: "美品 SONY α7 IV ILCE-7M4 ボディ 元箱・付属品完備",
   priceLabel: "現在価格",
   price: "248,000円",
   buyNow: "268,000円",
@@ -10,24 +10,13 @@ const SAMPLE_ACTIVE = {
   prefecture: "東京都",
   endTime: "10月30日 22:15",
   photoCount: 10,
-};
-
-const SAMPLE_ENDED = {
-  site: "メルカリ",
-  title: "Apple MacBook Air M3 13インチ 16GB / 512GB ミッドナイト",
-  priceLabel: "価格",
-  price: "162,000円",
-  condition: "未使用に近い",
-  shipping: "送料込み",
-  prefecture: "神奈川県",
-  photoCount: 8,
-  memo: "バッテリー最大容量100%・充放電12回。相場比較用に残す",
+  memo: "シャッター回数3,200回・元箱あり。相場比較用に残す",
 };
 
 export function MockHeroCard() {
   return (
     <div
-      className="mx-auto w-full max-w-[360px] overflow-hidden rounded-2xl border border-border bg-card shadow-lg sm:max-w-[380px]"
+      className="mx-auto w-full max-w-[360px] min-w-0 overflow-hidden rounded-2xl border border-border bg-card shadow-lg sm:max-w-[380px]"
       aria-label="保存した出品の表示見本"
     >
       <div className="flex items-center justify-between border-b border-black/10 bg-[#ffdc00] px-3.5 py-2 text-[11px] font-bold text-black">
@@ -74,8 +63,8 @@ export function MockHeroCard() {
 
 export function MockList() {
   return (
-    <div className="space-y-2.5" aria-label="保存した一覧の見本">
-      <div className="flex gap-3 rounded-2xl border border-border bg-card p-3 shadow-xs">
+    <div className="min-w-0 w-full space-y-2.5" aria-label="保存した一覧の見本">
+      <div className="flex min-w-0 gap-3 overflow-hidden rounded-2xl border border-border bg-card p-3 shadow-xs">
         <div className="flex h-16 w-20 shrink-0 items-center justify-center rounded-lg bg-[#fff8d6]">
           <CameraIllustration className="h-10 w-16 text-ink/80" />
         </div>
@@ -87,7 +76,7 @@ export function MockList() {
             </span>
             <span className="rounded-full bg-[#fff8d6] px-2 py-0.5 text-[10px] font-bold text-ink">検討中</span>
           </div>
-          <p className="mt-1 truncate text-sm font-bold text-ink">{SAMPLE_ACTIVE.title}</p>
+          <p className="mt-1 line-clamp-1 break-all text-sm font-bold text-ink">{SAMPLE_ACTIVE.title}</p>
           <p className="mt-0.5 text-xs text-muted">
             <span className="font-bold text-ink">{SAMPLE_ACTIVE.price}</span> · 入札 {SAMPLE_ACTIVE.bids} · {SAMPLE_ACTIVE.shipping}
           </p>
@@ -100,8 +89,8 @@ export function MockList() {
         <span className="h-px w-8 bg-black/30" />
       </div>
 
-      <div className="rounded-2xl border-2 border-[#ffdc00] bg-card p-3 shadow-xs">
-        <div className="flex gap-3">
+      <div className="min-w-0 overflow-hidden rounded-2xl border-2 border-[#ffdc00] bg-card p-3 shadow-xs">
+        <div className="flex min-w-0 gap-3">
           <div className="flex h-16 w-20 shrink-0 items-center justify-center rounded-lg bg-[#fff8d6]">
             <CameraIllustration className="h-10 w-16 text-ink/70" />
           </div>
@@ -109,19 +98,19 @@ export function MockList() {
             <div className="flex flex-wrap items-center gap-1.5">
               <span className="rounded bg-[#c62828] px-1.5 py-0.5 text-[10px] font-bold text-white">終了</span>
               <span className="rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-bold text-ink/80">
-                {SAMPLE_ENDED.site}
+                {SAMPLE_ACTIVE.site}
               </span>
               <span className="text-[11px] font-bold text-ink">→ おくならそのまま残る</span>
             </div>
-            <p className="mt-1 truncate text-sm font-bold text-ink">{SAMPLE_ENDED.title}</p>
+            <p className="mt-1 line-clamp-1 break-all text-sm font-bold text-ink">{SAMPLE_ACTIVE.title}</p>
             <p className="mt-0.5 text-xs text-muted">
-              <span className="font-bold text-ink">{SAMPLE_ENDED.price}</span> · {SAMPLE_ENDED.condition} · 写真{SAMPLE_ENDED.photoCount}枚保存済み
+              <span className="font-bold text-ink">{SAMPLE_ACTIVE.price}</span> · 写真{SAMPLE_ACTIVE.photoCount}枚保存済み
             </p>
           </div>
         </div>
         <div className="mt-2.5 rounded-xl bg-[#fff8d6] px-3 py-2 text-xs leading-5">
           <p className="font-bold text-ink">写真もメモも残ります</p>
-          <p className="mt-0.5 text-ink/80">メモ：{SAMPLE_ENDED.memo}</p>
+          <p className="mt-0.5 text-ink/80">メモ：{SAMPLE_ACTIVE.memo}</p>
         </div>
       </div>
     </div>
@@ -130,7 +119,7 @@ export function MockList() {
 
 function Spec({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-md bg-background px-2 py-1">
+    <div className="min-w-0 rounded-md bg-background px-2 py-1">
       <dt className="text-[10px] text-muted">{label}</dt>
       <dd className="truncate font-semibold text-ink">{value}</dd>
     </div>

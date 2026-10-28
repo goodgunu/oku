@@ -19,7 +19,7 @@ export function LandingPage() {
       {/* ヒーロー */}
       <section className="rounded-3xl border border-[#ffdc00] bg-gradient-to-b from-[#fff8d6] to-white px-5 py-7 sm:px-8 sm:py-10">
         <div className="grid items-center gap-6 md:grid-cols-[1.08fr_0.92fr] md:gap-8">
-          <div>
+          <div className="min-w-0">
             <p className="text-xs font-bold tracking-wider text-ink/80">
               ヤフオク · PayPayフリマ · ジモティー · メルカリ対応
             </p>
@@ -120,7 +120,7 @@ export function LandingPage() {
       {/* 残るデモ */}
       <section className="rounded-2xl border border-border bg-card p-5 sm:p-6">
         <div className="grid items-center gap-6 md:grid-cols-[0.95fr_1.05fr]">
-          <div>
+          <div className="min-w-0">
             <p className="text-xs font-bold text-ink/70">おくがいちばん役に立つとき</p>
             <h2 className="mt-1 text-lg font-extrabold leading-snug text-ink sm:text-xl">
               出品が終わっても、

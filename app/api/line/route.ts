@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
-import { LEGACY_FOLDER, clerkEnabled, userFolder } from "@/lib/account";
+import { LEGACY_FOLDER, authEnabled, userFolder } from "@/lib/account";
 import { baseUrl, buildConnectMessage, type LineMessage } from "@/lib/line-message";
 import { createLineConnectLink } from "@/lib/line-connect-code";
 import { linkedEmail } from "@/lib/line-link";
@@ -15,12 +15,6 @@ type LineEvent = {
   message?: { type?: string; text?: string };
 };
 
-/**
- * LINE Messaging API webhook。
- * 環境変数:
- * - LINE_CHANNEL_SECRET … 署名検証（未設定なら検証スキップ＝開発用）
- * - LINE_CHANNEL_ACCESS_TOKEN … 返信に必要
- */
 export async function POST(request: Request) {
   const secret = process.env.LINE_CHANNEL_SECRET || "";
   const token = process.env.LINE_CHANNEL_ACCESS_TOKEN || "";
@@ -81,10 +75,9 @@ async function handleEvent(event: LineEvent, origin: string): Promise<LineMessag
     ];
   }
 
-  // ログインが有効なら、LINEとGoogleアカウントの連携が必要
   let folder = LEGACY_FOLDER;
-  if (clerkEnabled()) {
-    const lineUserId = event.source?.userId || "";
+  const lineUserId = event.source?.userId || "";
+  if (authEnabled()) {
     const email = lineUserId ? await linkedEmail(lineUserId) : null;
     if (!email) {
       if (!lineUserId) return [{ type: "text", text: "このトークでは連携できません。1対1のトークで送ってください。" }];
@@ -94,7 +87,7 @@ async function handleEvent(event: LineEvent, origin: string): Promise<LineMessag
     folder = userFolder(email);
   }
 
-  return (await saveAndReply({ folder, url: canonical.canonicalUrl, origin })).messages;
+  return (await saveAndReply({ folder, url: canonical.canonicalUrl, origin, lineUserId: lineUserId || undefined })).messages;
 }
 
 function validLineSignature(body: string, secret: string, signature: string): boolean {

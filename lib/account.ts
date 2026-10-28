@@ -5,9 +5,24 @@ export function clerkEnabled(): boolean {
   return Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY);
 }
 
-export function normalizeEmail(email: string): string {
+export function authEnabled(): boolean {
+  return (
+    clerkEnabled() ||
+    Boolean(process.env.LINE_LOGIN_CHANNEL_ID && process.env.LINE_LOGIN_CHANNEL_SECRET)
+  );
+}
+
+export function normalizeEmail(email: string | null | undefined): string {
   const e = String(email || "").trim().toLowerCase();
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e) ? e : "";
+}
+
+/** メールアドレス、または Yahoo!/LINE/Clerk/X ログインの識別子（yahoo:xxx / line:xxx / clerk:xxx / x:xxx） */
+export function normalizeAccountKey(value: string | null | undefined): string {
+  const email = normalizeEmail(value);
+  if (email) return email;
+  const trimmed = String(value || "").trim();
+  return /^(?:yahoo|line|clerk|x):[A-Za-z0-9_-]{4,128}$/.test(trimmed) ? trimmed : "";
 }
 
 /** ユーザーごとの保存フォルダ名。ログインなしのときは従来の "me"。 */
@@ -23,6 +38,10 @@ export function isFolder(value: string): boolean {
 
 export function lineLinkKey(lineUserId: string): string {
   return `links/${createHash("sha256").update(lineUserId).digest("hex").slice(0, 40)}.json`;
+}
+
+export function lineRevKey(accountKey: string): string {
+  return `linkrev/${createHash("sha256").update(`email:${accountKey.trim().toLowerCase()}`).digest("hex").slice(0, 40)}.json`;
 }
 
 export function safeLineUserId(value: string): boolean {

@@ -8,6 +8,19 @@ export type ParsedPhoto = {
 export type SourceId = "yahoo-auction" | "paypay" | "jmty" | "mercari";
 export type PriceKind = "fixed" | "current_bid" | "free";
 export type DetailLevel = "full" | "partial";
+export type Availability = "live" | "ended" | "unknown";
+export type WatchStatus = "watching" | "contacted" | "passed" | "bought";
+
+export type PricePoint = {
+  at: string;
+  priceLabel: string;
+  priceYen: number | null;
+};
+
+export type MemoEntry = {
+  at: string;
+  text: string;
+};
 
 export type ParsedListing = {
   id: string;
@@ -37,8 +50,6 @@ export type ParsedListing = {
   postedAt?: string;
 };
 
-export type Availability = "live" | "ended" | "unknown";
-
 export type ArchiveRecord = {
   id: string;
   source: SourceId;
@@ -47,10 +58,13 @@ export type ArchiveRecord = {
   sourceUrl: string;
   savedAt: string;
   updatedAt: string;
+  lastCheckedAt?: string;
+  checkAttemptAt?: string;
   availability: Availability;
   title: string;
   priceYen: number | null;
   priceLabel: string;
+  priceHistory?: PricePoint[];
   bidCount: number | null;
   seller: string;
   sellerId: string;
@@ -65,6 +79,9 @@ export type ArchiveRecord = {
   category?: string;
   postedAt?: string;
   memo: string;
+  memoEntries?: MemoEntry[];
+  favorite?: boolean;
+  watchStatus?: WatchStatus;
 };
 
 export type ParseResult =

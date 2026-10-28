@@ -1,46 +1,51 @@
 "use client";
 
-import { useClerk, useUser } from "@clerk/nextjs";
-import { useState } from "react";
+import { useClerk } from "@clerk/nextjs";
+import { ConnectBadges } from "@/components/connect-badges";
 
-export function AccountButton() {
-  const { isSignedIn, user } = useUser();
-  const { signOut } = useClerk();
-  const [notice, setNotice] = useState("");
-  if (!isSignedIn) return null;
-  const hasLine = (user?.externalAccounts || []).some((a) => String(a.provider) === "line" || String(a.provider) === "oauth_line");
-
-  async function linkLine() {
-    setNotice("");
-    try {
-      const account = await user?.createExternalAccount({ strategy: "oauth_line", redirectUrl: "/" });
-      const url = account?.verification?.externalVerificationRedirectURL;
-      if (url) window.location.href = url.toString();
-      else setNotice("LINEを開けませんでした。");
-    } catch (error) {
-      setNotice(error instanceof Error ? error.message : "LINEを開けませんでした。");
-    }
-  }
-
+export function AccountButton({ signedIn = false, clerkActive = false }: { signedIn?: boolean; clerkActive?: boolean }) {
+  if (!signedIn) return null;
   return (
     <div className="flex items-center gap-2">
-      {notice && <span className="text-xs text-red-700">{notice}</span>}
-      {!hasLine && (
-        <button
-          type="button"
-          onClick={() => void linkLine()}
-          className="rounded-full bg-[#06C755] px-3 py-1 text-xs font-bold text-white"
-        >
-          LINEを連携
-        </button>
-      )}
-      <button
-        type="button"
-        onClick={() => void signOut({ redirectUrl: "/" })}
-        className="rounded-full border border-black/30 px-3 py-1 text-xs font-bold text-ink"
-      >
-        ログアウト
-      </button>
+      <ConnectBadges />
+      {clerkActive ? <ClerkSignOutButton /> : <CookieSignOutButton />}
     </div>
+  );
+}
+
+function ClerkSignOutButton() {
+  const { signOut } = useClerk();
+  async function logout() {
+    await fetch("/api/auth", { method: "DELETE" }).catch(() => undefined);
+    try {
+      await signOut({ redirectUrl: "/" });
+    } catch {
+      window.location.href = "/";
+    }
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => void logout()}
+      className="inline-flex h-8 items-center rounded-full border border-black/30 bg-white/80 px-3 text-xs font-bold text-ink hover:bg-white"
+    >
+      ログアウト
+    </button>
+  );
+}
+
+function CookieSignOutButton() {
+  async function logout() {
+    await fetch("/api/auth", { method: "DELETE" }).catch(() => undefined);
+    window.location.href = "/";
+  }
+  return (
+    <button
+      type="button"
+      onClick={() => void logout()}
+      className="inline-flex h-8 items-center rounded-full border border-black/30 bg-white/80 px-3 text-xs font-bold text-ink hover:bg-white"
+    >
+      ログアウト
+    </button>
   );
 }

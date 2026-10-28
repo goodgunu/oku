@@ -1,7 +1,8 @@
 import { ArchiveForm } from "@/components/archive-form";
 import { LibraryList } from "@/components/library-list";
-import { LoginGate } from "@/components/login-gate";
 import { LineAddCard } from "@/components/line-add-card";
+import { LoginGate } from "@/components/login-gate";
+import { NotifySettingCard } from "@/components/notify-setting";
 import { identity } from "@/lib/current-user";
 import { listRecords } from "@/lib/store";
 
@@ -18,11 +19,12 @@ export default async function HomePage() {
       <ArchiveForm />
       <section className="space-y-3">
         <div className="flex items-baseline justify-between border-b-2 border-yahoo pb-2">
-          <h2 className="text-lg font-bold text-ink">ライブラリ</h2>
+          <h2 className="text-lg font-bold text-ink">保存した一覧</h2>
           <span className="text-xs font-medium text-muted">{listings.length}件</span>
         </div>
         <LibraryList listings={listings} />
       </section>
+      <NotifySettingCard />
       <LineAddCard />
     </div>
   );

@@ -6,9 +6,6 @@ import { isListingId } from "@/lib/sources";
 
 type Ctx = { params: Promise<{ id: string; index: string }> };
 
-/**
- * 写真。ログイン中は自分の写真だけ。LINE のカード用に、署名つき URL（?u=&t=）でもひらける。
- */
 export async function GET(request: Request, context: Ctx) {
   const { id, index } = await context.params;
   const i = Number(index);
@@ -22,8 +19,8 @@ export async function GET(request: Request, context: Ctx) {
   if (u && isFolder(u) && verifyPhoto(u, id, i, t)) {
     folder = u;
   } else {
-    const user = await currentUser();
-    if (!user) return Response.json({ message: "Googleでログインしてください。" }, { status: 401 });
+    const user = await currentUser(request);
+    if (!user) return Response.json({ message: "ログインしてください。" }, { status: 401 });
     folder = user.folder;
   }
   const record = await getRecord(folder, id);

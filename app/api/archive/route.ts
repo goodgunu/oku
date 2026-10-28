@@ -5,7 +5,7 @@ import { saveListing } from "@/lib/store";
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
-  const user = await currentUser();
+  const user = await currentUser(request);
   if (!user) return unauthorized();
   try {
     let body: { url?: unknown };

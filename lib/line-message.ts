@@ -18,9 +18,10 @@ export function baseUrl(request?: Request): string {
 
 export function buildSavedMessage(
   record: ArchiveRecord,
-  opts: { origin: string; ended?: boolean; alreadySaved?: boolean; heroUrl?: string },
+  opts: { origin: string; ended?: boolean; alreadySaved?: boolean; heroUrl?: string; actionUri?: string },
 ): LineMessage[] {
   const link = `${opts.origin}/listings/${record.id}`;
+  const actionUri = opts.actionUri || link;
   const label = [opts.ended ? "（終了済み）" : "", opts.alreadySaved ? "（保存済みなので更新しました）" : ""].join("");
   const source = getSource(record.source);
   const priceName = record.priceKind === "current_bid" || (!record.priceKind && source.id === "yahoo-auction") ? "現在価格" : "価格";
@@ -82,7 +83,7 @@ export function buildSavedMessage(
           backgroundColor: "#ffdc00",
           cornerRadius: "md",
           paddingAll: "12px",
-          action: { type: "uri", label: "おくで見る", uri: link },
+          action: { type: "uri", label: "おくで見る", uri: actionUri },
           contents: [
             {
               type: "text",

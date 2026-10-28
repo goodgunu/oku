@@ -3,9 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { RefreshCw, Share } from "lucide-react";
-import { PhotoGallery } from "@/components/photo-lightbox";
+import { ArrowLeft, ExternalLink, RefreshCw, Share } from "lucide-react";
+import { DescriptionSection, EquipmentTags } from "@/components/detail-blocks";
+import { PhotoGallery } from "@/components/photo-gallery";
+import { PhotoPicker } from "@/components/photo-picker";
 import { ShareXSheet, XIcon } from "@/components/share-x-sheet";
+import { SpecChip } from "@/components/spec-chip";
 import { formatYen } from "@/lib/format";
 import { WATCH_STATUS_LABELS } from "@/lib/library-filter";
 import { priceChange } from "@/lib/price-history";
@@ -24,9 +27,9 @@ export function ListingDetail({ initialListing }: { initialListing: ArchiveRecor
   const [savedNotice, setSavedNotice] = useState("");
   const [checking, setChecking] = useState(false);
   const [checkNote, setCheckNote] = useState("");
+  const [pickingPhotos, setPickingPhotos] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [shareMode, setShareMode] = useState<"x" | "native">("x");
-  const [descExpanded, setDescExpanded] = useState(false);
 
   const badge =
     listing.availability === "live"
@@ -37,9 +40,31 @@ export function ListingDetail({ initialListing }: { initialListing: ArchiveRecor
 
   const change = priceChange(listing);
   const photos = listing.photos.map((photo, index) => ({
+    url: photo.key ? `/api/photo/${listing.id}/${index}` : photo.url,
     src: photo.key ? `/api/photo/${listing.id}/${index}` : photo.url,
-    alt: photo.caption || "",
+    caption: photo.caption || "",
+    alt: photo.caption || listing.title,
   }));
+
+  const chips = [
+    { label: "状態", value: listing.condition || "" },
+    { label: "送料", value: listing.shipping || "" },
+    { label: "地域", value: listing.prefecture || "" },
+    { label: "即決", value: listing.buyNowYen != null ? formatYen(listing.buyNowYen) : "" },
+    { label: "入札", value: listing.bidCount != null ? `${listing.bidCount}件` : "" },
+  ].filter((c) => c.value);
+
+  const tags = [
+    ...(listing.category
+      ? listing.category
+          .split(/[>＞/・,、]+/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : []),
+    ...(listing.condition ? [listing.condition] : []),
+    ...(listing.shipping ? [listing.shipping] : []),
+    ...(listing.prefecture ? [listing.prefecture] : []),
+  ];
 
   async function patch(fields: Partial<ArchiveRecord>, noticeText?: string) {
     setSavingMemo(true);
@@ -59,6 +84,14 @@ export function ListingDetail({ initialListing }: { initialListing: ArchiveRecor
     } finally {
       setSavingMemo(false);
     }
+  }
+
+  async function keepSelectedPhotos(indexes: number[]) {
+    const nextPhotos = indexes
+      .map((i) => listing.photos[i])
+      .filter((p): p is NonNullable<typeof p> => Boolean(p));
+    await patch({ photos: nextPhotos }, "残す写真を更新しました");
+    setPickingPhotos(false);
   }
 
   async function addMemoEntry(e: React.FormEvent) {
@@ -101,19 +134,17 @@ export function ListingDetail({ initialListing }: { initialListing: ArchiveRecor
     router.refresh();
   }
 
-  const desc = listing.description || "";
-  const isLongDesc = desc.length > 360 || desc.split("\n").length > 10;
-  const shownDesc = !descExpanded && isLongDesc ? `${desc.slice(0, 360)}…` : desc;
-
   return (
-    <article className="space-y-6">
+    <article className="space-y-6 pb-20">
       {/* ナビゲーション＆操作バー */}
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Link
           href="/"
-          className="inline-flex h-8 items-center rounded-full border border-border bg-card px-3.5 text-xs font-bold text-ink shadow-2xs hover:bg-background"
+          className="inline-flex h-8 shrink-0 items-center gap-1 whitespace-nowrap rounded-full border border-black/15 bg-white px-3.5 text-xs font-bold text-[#0f1419] shadow-2xs hover:bg-black/5"
+          data-control="back"
         >
-          ← 保存した一覧
+          <ArrowLeft className="size-3.5" />
+          保存した一覧
         </Link>
 
         <div className="flex flex-wrap items-center gap-1.5">
@@ -137,7 +168,7 @@ export function ListingDetail({ initialListing }: { initialListing: ArchiveRecor
               setShareMode("x");
               setShareOpen(true);
             }}
-            className="inline-flex h-8 items-center gap-1 rounded-full bg-[#0f1419] px-3 text-xs font-bold text-white"
+            className="inline-flex h-8 items-center gap-1.5 rounded-full bg-[#0f1419] px-3 text-xs font-bold text-white"
           >
             <XIcon className="size-3.5" />
             Xで共有
@@ -149,7 +180,7 @@ export function ListingDetail({ initialListing }: { initialListing: ArchiveRecor
               setShareMode("native");
               setShareOpen(true);
             }}
-            className="inline-flex h-8 items-center gap-1 rounded-full border border-border bg-card px-3 text-xs font-bold text-ink hover:bg-background"
+            className="inline-flex h-8 items-center gap-1.5 rounded-full border border-[#0f1419] bg-white px-3 text-xs font-bold text-[#0f1419] hover:bg-background"
           >
             <Share className="size-3.5" />
             共有
@@ -179,92 +210,162 @@ export function ListingDetail({ initialListing }: { initialListing: ArchiveRecor
         <p className="rounded-xl border border-border bg-card px-4 py-2.5 text-xs font-bold text-ink">{checkNote}</p>
       )}
 
-      {/* タイトル・価格・ステータス */}
+      {/* 写真ギャラリー / 写真ピッカー（のこす同様、上部に配置） */}
+      {pickingPhotos ? (
+        <PhotoPicker
+          title={listing.title}
+          photos={listing.photos.map((p, i) => ({
+            ...p,
+            src: p.key ? `/api/photo/${listing.id}/${i}` : p.url,
+          }))}
+          replacing={listing.photos.length > 0}
+          busy={savingMemo ? "保存中…" : ""}
+          onKeep={(indexes) => void keepSelectedPhotos(indexes)}
+          onCancel={() => setPickingPhotos(false)}
+        />
+      ) : photos.length > 0 ? (
+        <section className="space-y-3">
+          <PhotoGallery photos={photos} title={listing.title} />
+          {photos.length > 1 && (
+            <button
+              type="button"
+              onClick={() => setPickingPhotos(true)}
+              className="h-11 w-full rounded-xl bg-[#ffdc00] text-sm font-bold text-black shadow-2xs transition hover:bg-[#f5c400]"
+            >
+              残す写真を選び直す（{photos.length}枚）
+            </button>
+          )}
+        </section>
+      ) : null}
+
+      {/* 掲載状態バー */}
+      <div className="flex items-center justify-between rounded-xl border border-border bg-card px-3.5 py-2.5 text-sm shadow-sm">
+        <span className="flex items-center gap-2">
+          <span
+            className={`inline-block size-2 rounded-full ${
+              listing.availability === "live" ? "bg-live" : "bg-[#b5b5b5]"
+            }`}
+          />
+          <span
+            className={
+              listing.availability === "ended"
+                ? "font-bold text-ink"
+                : listing.availability === "live"
+                  ? "font-bold text-live"
+                  : "text-muted"
+            }
+          >
+            {listing.availability === "ended"
+              ? "掲載終了"
+              : listing.availability === "live"
+                ? "出品中"
+                : "まだ確認していません"}
+          </span>
+        </span>
+        {change && (
+          <span
+            className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
+              change.direction === "down" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-900"
+            }`}
+          >
+            {change.deltaText}（{change.fromText} → {change.toText}）
+          </span>
+        )}
+      </div>
+
+      {/* タイトル・価格・スペックチップ */}
       <div className="space-y-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
         <div className="flex flex-wrap items-center gap-2 text-xs">
           <span className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${badge.className}`}>{badge.label}</span>
           <span className="rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-bold text-ink/70">
             {sourceLabel(listing.source)}
           </span>
-          {change && (
-            <span
-              className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                change.direction === "down" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-900"
-              }`}
-            >
-              {change.deltaText}（{change.fromText} → {change.toText}）
-            </span>
-          )}
           <span className="text-muted">{listing.id}</span>
         </div>
 
-        <h1 className="text-xl font-bold leading-snug text-ink sm:text-2xl">{listing.title}</h1>
+        <h1 className="text-[19px] font-bold leading-snug break-words text-ink sm:text-2xl">{listing.title}</h1>
 
         {listing.priceLabel && listing.priceLabel !== "—" ? (
-          <p className="text-2xl font-bold text-ink sm:text-3xl">
-            {listing.priceKind === "current_bid" ? (
-              <span className="mr-2 text-xs font-medium text-muted">現在価格</span>
-            ) : null}
-            {listing.priceLabel}
+          <p className="flex items-baseline gap-1.5 leading-none">
+            <span className="text-xs font-bold text-muted">
+              {listing.priceKind === "current_bid" ? "現在価格" : "価格"}
+            </span>
+            <span className="text-[26px] font-extrabold tabular-nums text-ink sm:text-3xl">{listing.priceLabel}</span>
           </p>
         ) : null}
 
-        {/* 検討ステータス */}
-        <div className="flex flex-wrap items-center gap-1.5 pt-1">
-          {WATCH_OPTIONS.map((st) => {
-            const active = (listing.watchStatus || "watching") === st;
-            return (
-              <button
-                key={st}
-                type="button"
-                onClick={() => void patch({ watchStatus: st })}
-                className={`rounded-full border px-3 py-1 text-xs font-bold transition ${
-                  active
-                    ? "border-[#ffdc00] bg-[#ffdc00] text-black"
-                    : "border-border bg-background text-muted hover:text-ink"
-                }`}
-              >
-                {WATCH_STATUS_LABELS[st]}
-              </button>
-            );
-          })}
-        </div>
+        {chips.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 pt-1" data-card="chips">
+            {chips.map((chip) => (
+              <SpecChip key={chip.label} label={chip.label} value={chip.value} />
+            ))}
+          </div>
+        )}
 
         {listing.detailLevel === "partial" && listing.source === "mercari" ? (
           <p className="rounded-lg bg-background px-3 py-2 text-xs text-muted">{MERCARI_NOTE}</p>
         ) : null}
       </div>
 
-      {/* 基本情報 */}
-      <dl className="grid grid-cols-2 gap-3 rounded-xl border border-border bg-card p-4 text-sm shadow-sm sm:grid-cols-3">
-        {listing.bidCount != null && <Fact label="入札" value={`${listing.bidCount}件`} />}
-        {listing.buyNowYen != null && <Fact label="即決" value={formatYen(listing.buyNowYen)} />}
-        {listing.seller && <Fact label="出品者" value={listing.seller} />}
-        {listing.prefecture && <Fact label="出品地域" value={listing.prefecture} />}
-        {listing.shipping && <Fact label="送料・発送" value={listing.shipping} />}
-        {listing.condition && <Fact label="状態" value={listing.condition} />}
-        {listing.category && <Fact label="カテゴリ" value={listing.category} />}
-        {listing.endTimeLabel && <Fact label="終了" value={listing.endTimeLabel} />}
-        {listing.postedAt && (
-          <Fact
-            label="掲載"
-            value={new Date(listing.postedAt).toLocaleDateString("ja-JP", { timeZone: "Asia/Tokyo" })}
-          />
-        )}
-        <Fact
-          label="元ページ"
-          value={
-            <a
-              href={listing.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-bold text-ink underline decoration-yahoo decoration-2 underline-offset-2 hover:text-black"
+      {/* 検討ステータス（のこす同様のピル型セグメント） */}
+      <div className="flex rounded-full border border-border bg-card p-1 shadow-2xs">
+        {WATCH_OPTIONS.map((st) => {
+          const active = (listing.watchStatus || "watching") === st;
+          return (
+            <button
+              key={st}
+              type="button"
+              onClick={() => void patch({ watchStatus: st })}
+              className={`flex-1 rounded-full px-2 py-2 text-xs transition ${
+                active ? "bg-[#ffdc00] font-bold text-black shadow-2xs" : "text-muted hover:text-ink"
+              }`}
             >
-              {sourceLabel(listing.source)}で開く
-            </a>
-          }
-        />
-      </dl>
+              {WATCH_STATUS_LABELS[st]}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 要点 */}
+      <section>
+        <h2 className="border-b-2 border-[#ffdc00] pb-1 text-sm font-bold text-ink">要点</h2>
+        <dl className="mt-2 grid grid-cols-2 rounded-xl border border-border bg-card px-4 shadow-sm">
+          {listing.bidCount != null && <Fact label="入札" value={`${listing.bidCount}件`} />}
+          {listing.buyNowYen != null && <Fact label="即決" value={formatYen(listing.buyNowYen)} />}
+          {listing.seller && <Fact label="出品者" value={listing.seller} />}
+          {listing.prefecture && <Fact label="出品地域" value={listing.prefecture} />}
+          {listing.shipping && <Fact label="送料・発送" value={listing.shipping} />}
+          {listing.condition && <Fact label="状態" value={listing.condition} />}
+          {listing.category && <Fact label="カテゴリ" value={listing.category} />}
+          {listing.endTimeLabel && <Fact label="終了" value={listing.endTimeLabel} />}
+          {listing.postedAt && (
+            <Fact
+              label="掲載"
+              value={new Date(listing.postedAt).toLocaleDateString("ja-JP", { timeZone: "Asia/Tokyo" })}
+            />
+          )}
+          <Fact
+            label="元ページ"
+            value={
+              <a
+                href={listing.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 font-bold text-ink underline decoration-[#ffdc00] decoration-2 underline-offset-2 hover:text-black"
+              >
+                {sourceLabel(listing.source)}で開く
+                <ExternalLink className="size-3.5" />
+              </a>
+            }
+          />
+        </dl>
+      </section>
+
+      {/* タグ・特徴（もっと見る開閉） */}
+      <EquipmentTags items={tags} />
+
+      {/* 出品者の説明（もっと見る開閉） */}
+      <DescriptionSection text={listing.description} />
 
       {/* 価格の推移（2件以上あるとき） */}
       {(listing.priceHistory?.length ?? 0) >= 2 && (
@@ -317,7 +418,7 @@ export function ListingDetail({ initialListing }: { initialListing: ArchiveRecor
             disabled={savingMemo || !newEntry.trim()}
             className="rounded-lg border border-border bg-background px-3 text-xs font-bold text-ink hover:bg-card disabled:opacity-50"
           >
-            追加
+            残す
           </button>
         </form>
 
@@ -325,7 +426,7 @@ export function ListingDetail({ initialListing }: { initialListing: ArchiveRecor
           <ul className="space-y-1.5 pt-1 text-xs">
             {listing.memoEntries!.map((entry, idx) => (
               <li key={`${entry.at}-${idx}`} className="rounded-lg bg-background px-3 py-2">
-                <span className="mr-2 text-[11px] text-muted">
+                <span className="mr-2 text-[11px] tabular-nums text-muted">
                   {new Date(entry.at).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })}
                 </span>
                 <span className="text-ink">{entry.text}</span>
@@ -335,48 +436,51 @@ export function ListingDetail({ initialListing }: { initialListing: ArchiveRecor
         )}
       </section>
 
-      {/* 写真 */}
-      {photos.length > 0 && (
-        <section className="space-y-3">
-          <h2 className="border-b-2 border-yahoo pb-1 text-sm font-bold text-ink">写真（{photos.length}）</h2>
-          <PhotoGallery photos={photos} />
-        </section>
-      )}
-
-      {/* 説明（もっと見る対応） */}
-      {desc && (
-        <section className="space-y-2">
-          <h2 className="border-b-2 border-yahoo pb-1 text-sm font-bold text-ink">説明</h2>
-          <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-            <pre className="whitespace-pre-wrap text-sm leading-relaxed text-ink font-sans">{shownDesc}</pre>
-            {isLongDesc && (
-              <button
-                type="button"
-                onClick={() => setDescExpanded((v) => !v)}
-                className="mt-3 text-xs font-bold text-ink underline decoration-yahoo decoration-2 underline-offset-2"
-              >
-                {descExpanded ? "閉じる" : "もっと見る"}
-              </button>
-            )}
-          </div>
-        </section>
-      )}
-
       <p className="text-xs text-muted">
         保存: {new Date(listing.savedAt).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })} · 更新:{" "}
         {new Date(listing.updatedAt).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })}
       </p>
 
-      <ShareXSheet record={listing} open={shareOpen} onOpenChange={setShareOpen} mode={shareMode} />
+      {/* 下部固定アクションバー（のこす共通） */}
+      {!pickingPhotos && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 p-3 backdrop-blur">
+          <div className="mx-auto flex max-w-3xl gap-2">
+            <button
+              type="button"
+              disabled={checking}
+              onClick={() => void checkNow()}
+              className="h-11 flex-1 rounded-full border border-border bg-background text-sm font-bold text-ink hover:bg-card disabled:opacity-50"
+            >
+              {checking ? "確認中…" : "掲載を確認"}
+            </button>
+            <a
+              href={listing.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-11 flex-[1.4] items-center justify-center rounded-full bg-[#ffdc00] text-sm font-bold text-black shadow-2xs hover:bg-[#f5c400]"
+            >
+              {sourceLabel(listing.source)}で開く
+            </a>
+          </div>
+        </div>
+      )}
+
+      <ShareXSheet
+        key={`${listing.id}-${listing.updatedAt}-${shareMode}`}
+        record={listing}
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        mode={shareMode}
+      />
     </article>
   );
 }
 
 function Fact({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div>
-      <dt className="text-xs text-muted">{label}</dt>
-      <dd className="mt-0.5 font-bold text-ink">{value}</dd>
+    <div className="border-b border-border py-2.5 pr-3 last:border-b-0">
+      <dt className="text-[11px] text-muted">{label}</dt>
+      <dd className="mt-0.5 text-sm font-bold text-ink">{value}</dd>
     </div>
   );
 }

@@ -3,6 +3,8 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ExternalLink } from "lucide-react";
+import { DescriptionSection, EquipmentTags } from "@/components/detail-blocks";
+import { SpecChip } from "@/components/spec-chip";
 import { getShare } from "@/lib/store";
 
 type Props = { params: Promise<{ sid: string }> };
@@ -15,7 +17,7 @@ async function origin(): Promise<string> {
 }
 
 function statusText(availability: string): string {
-  return availability === "ended" ? "終了" : availability === "live" ? "出品中" : "";
+  return availability === "ended" ? "掲載終了" : availability === "live" ? "出品中" : "";
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -68,6 +70,18 @@ export default async function SharePage({ params }: Props) {
     { label: "入札", value: listing.bidCount != null ? `${listing.bidCount}件` : "" },
   ].filter((c) => c.value);
 
+  const tags = [
+    ...(listing.category
+      ? listing.category
+          .split(/[>＞/・,、]+/)
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : []),
+    ...(listing.condition ? [listing.condition] : []),
+    ...(listing.shipping ? [listing.shipping] : []),
+    ...(listing.prefecture ? [listing.prefecture] : []),
+  ];
+
   return (
     <div className="mx-auto max-w-xl space-y-4 pb-8">
       {indexes.length > 0 && (
@@ -118,28 +132,19 @@ export default async function SharePage({ params }: Props) {
           </p>
         )}
         {chips.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1.5" data-share="chips">
+          <div className="mt-2.5 flex flex-wrap gap-1.5" data-share="chips">
             {chips.map((chip) => (
-              <span
-                key={chip.label}
-                className="inline-flex items-baseline gap-1 rounded-md border border-border bg-background px-2 py-0.5 text-xs text-ink"
-              >
-                <span className="text-[10px] text-muted">{chip.label}</span>
-                <span className="font-bold">{chip.value}</span>
-              </span>
+              <SpecChip key={chip.label} label={chip.label} value={chip.value} />
             ))}
           </div>
         )}
       </div>
 
-      {listing.description && (
-        <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-          <h2 className="mb-2 text-xs font-bold text-muted">出品説明</h2>
-          <pre className="whitespace-pre-wrap text-xs leading-relaxed text-ink font-sans">{listing.description}</pre>
-        </section>
-      )}
+      <EquipmentTags items={tags} />
 
-      <section className="rounded-2xl border border-[#ffdc00] bg-[#fff8d6] p-5 text-center">
+      <DescriptionSection text={listing.description} />
+
+      <section className="mt-6 rounded-2xl border border-[#ffdc00] bg-[#fff8d6] p-5 text-center">
         <p className="text-sm font-bold text-ink">気になる出品を、消える前に残す</p>
         <p className="mt-1 text-xs leading-6 text-ink/80">
           ヤフオク・PayPayフリマ・ジモティー・メルカリの出品は、落札や掲載終了で見られなくなります。おくなら、写真も価格も自分のアカウントに残せます。
@@ -152,7 +157,7 @@ export default async function SharePage({ params }: Props) {
         </Link>
       </section>
 
-      <p className="text-center text-[11px] leading-5 text-muted">
+      <p className="mt-6 text-center text-[11px] leading-5 text-muted">
         {/^https?:\/\//.test(listing.sourceUrl) && (
           <>
             元の出品ページ:{" "}

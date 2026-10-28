@@ -1,7 +1,7 @@
 import { currentUser, unauthorized } from "@/lib/current-user";
 import { deleteRecord, getRecord, putRecord } from "@/lib/store";
 import { isListingId } from "@/lib/sources";
-import type { ArchiveRecord, MemoEntry, WatchStatus } from "@/lib/types";
+import type { ArchiveRecord, MemoEntry, ParsedPhoto, WatchStatus } from "@/lib/types";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -52,6 +52,20 @@ export async function PATCH(request: Request, context: Ctx) {
       if (typeof item.text !== "string" || !item.text.trim()) return [];
       const at = typeof item.at === "string" && !Number.isNaN(Date.parse(item.at)) ? item.at : new Date().toISOString();
       return [{ at, text: item.text.trim().slice(0, 500) }];
+    });
+  }
+  if (Array.isArray(body.photos)) {
+    next.photos = body.photos.slice(0, 40).flatMap((photo) => {
+      if (!photo || typeof photo !== "object") return [];
+      const p = photo as Partial<ParsedPhoto>;
+      if (typeof p.url !== "string" || !p.url.trim()) return [];
+      return [
+        {
+          url: p.url,
+          caption: typeof p.caption === "string" ? p.caption : "",
+          ...(typeof p.key === "string" && p.key ? { key: p.key } : {}),
+        },
+      ];
     });
   }
   if (isWatchStatus(body.watchStatus)) next.watchStatus = body.watchStatus;

@@ -1,173 +1,328 @@
+import Image from "next/image";
+import { Camera, Check, ChevronLeft, ImageIcon, Mic, Plus, Search, Phone as PhoneIcon, Menu, X } from "lucide-react";
+import { AppCard, CameraIllustration } from "@/components/landing-mocks";
+
+const YELLOW = "#ffdc00";
+const LINE_GREEN = "#06C755";
+
+function Frame({ children, bg = "#F2F2F2", label, height = 300 }: { children: React.ReactNode; bg?: string; label: string; height?: number }) {
+  return (
+    <div role="img" aria-label={label} className="mx-auto mt-3 w-full max-w-[260px] rounded-[22px] p-1.5" style={{ background: "#1C1917" }}>
+      <div className="overflow-hidden rounded-[17px] text-left" style={{ background: bg, height }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+export function OkuIcon({ size = 40, badge = true, ring = false }: { size?: number; badge?: boolean; ring?: boolean }) {
+  return (
+    <span className="relative inline-block shrink-0" style={{ width: size, height: size }}>
+      <Image
+        src="/icon.png"
+        alt=""
+        width={size * 2}
+        height={size * 2}
+        className="size-full rounded-full object-cover"
+        style={ring ? { boxShadow: `0 0 0 3px #fff, 0 0 0 5px ${YELLOW}` } : undefined}
+      />
+      {badge && (
+        <span className="absolute -right-1 -bottom-1 grid place-items-center rounded-md text-white" style={{ width: size * 0.4, height: size * 0.4, background: LINE_GREEN, fontSize: size * 0.16 }}>
+          LINE
+        </span>
+      )}
+    </span>
+  );
+}
+
+function Dummy({ size = 40 }: { size?: number }) {
+  return <span className="inline-block shrink-0 rounded-full" style={{ width: size, height: size, background: "#D9D6D2" }} />;
+}
+
+function LineBadge({ size }: { size: number }) {
+  return (
+    <span className="absolute -right-0.5 -bottom-0.5 grid place-items-center rounded-[5px] text-white" style={{ width: size, height: size, background: LINE_GREEN, boxShadow: "0 0 0 1.5px rgba(255,255,255,0.7)" }}>
+      <svg viewBox="0 0 24 24" width={size * 0.7} height={size * 0.7} aria-hidden>
+        <path d="M12 4C7.6 4 4 6.9 4 10.5c0 3.1 2.7 5.7 6.4 6.3.3.1.6.2.7.5.1.2 0 .6 0 .9l-.1.8c0 .2-.2.9.8.5s5.4-3.2 7.3-5.5C20.4 12.600 20 11.600 20 10.500 20 6.900 16.400 4 12 4z" fill="#fff" />
+      </svg>
+    </span>
+  );
+}
+
+function FriendIcon({ size = 40 }: { size?: number }) {
+  return (
+    <span className="relative inline-block shrink-0" style={{ width: size, height: size }}>
+      <svg viewBox="0 0 40 40" width={size} height={size} aria-hidden className="rounded-full">
+        <rect width="40" height="40" fill="#C9CDD3" />
+        <circle cx="20" cy="16" r="7" fill="#F4F5F7" />
+        <path d="M6 40c0-8 6-13 14-13s14 5 14 13z" fill="#F4F5F7" />
+      </svg>
+      <LineBadge size={Math.round(size * 0.42)} />
+    </span>
+  );
+}
+
+function AppTile({ children, from, to }: { children: React.ReactNode; from: string; to: string }) {
+  return (
+    <span className="grid size-10 place-items-center rounded-[10px]" style={{ background: `linear-gradient(160deg, ${from}, ${to})`, boxShadow: "inset 0 0 0 0.5px rgba(0,0,0,0.08)" }}>
+      {children}
+    </span>
+  );
+}
+
+function ActionCircle({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="grid size-10 place-items-center rounded-full" style={{ background: "rgba(120,120,128,0.18)" }}>
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#111" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        {children}
+      </svg>
+    </span>
+  );
+}
+
+function Cell({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <div className="flex flex-col items-center gap-1">
+      {icon}
+      <span className="min-h-[22px] text-center text-[8.5px] leading-[11px]" style={{ color: "#111" }}>{label}</span>
+    </div>
+  );
+}
+
+// 1. 共有シート（iOSの共有シートに近づけた汎用モック）
+function ShareSheet() {
+  const divider = { borderColor: "rgba(60,60,67,0.22)" };
+  return (
+    <Frame label="出品サイトの共有ボタンを押すと、友だちの並びに「おく」が出る共有シートの画面（サンプル）" bg="#9AA3AE" height={350}>
+      <div className="relative flex h-full flex-col justify-end overflow-hidden">
+        <div className="absolute inset-x-0 top-0 flex h-24 items-center justify-center bg-gradient-to-br from-[#fff8d6] via-[#ffef99] to-[#ffdc00]/60 opacity-75 blur-[1px]">
+          <CameraIllustration className="h-14 w-24 text-ink/70" />
+        </div>
+        <div
+          className="relative mx-1.5 mb-1.5 rounded-[22px] px-3 pt-3 pb-2"
+          style={{ background: "linear-gradient(180deg, rgba(236,236,240,0.88), rgba(244,244,246,0.94))", backdropFilter: "blur(14px)", boxShadow: "0 0 0 0.5px rgba(0,0,0,0.12)" }}
+        >
+          <div className="flex items-center gap-2.5 border-b pb-2.5" style={divider}>
+            <span className="grid size-9 place-items-center rounded-[9px] text-[8px] leading-[10px] font-extrabold text-black" style={{ background: "linear-gradient(160deg,#FFDC00,#F5C400)" }}>
+              <span className="text-center">出品<br />ページ</span>
+            </span>
+            <span className="truncate text-[11px] font-bold" style={{ color: "#111" }}>SONY α7 IV ボディ</span>
+          </div>
+
+          <div className="grid grid-cols-4 gap-x-1 border-b py-2.5" style={divider}>
+            <Cell
+              label="おく"
+              icon={
+                <span className="relative inline-block size-10">
+                  <Image src="/icon.png" alt="" width={80} height={80} className="size-full rounded-full object-cover" style={{ boxShadow: `0 0 0 2px #fff, 0 0 0 4px ${YELLOW}` }} />
+                  <LineBadge size={17} />
+                </span>
+              }
+            />
+            {["友だち", "友だち", "友だち"].map((n, i) => (
+              <Cell key={i} label={n} icon={<FriendIcon />} />
+            ))}
+          </div>
+
+          <div className="grid grid-cols-4 gap-x-1 border-b py-2.5" style={divider}>
+            <Cell
+              label="AirDrop"
+              icon={
+                <AppTile from="#4C9BFF" to="#1F6FEB">
+                  <svg viewBox="0 0 40 40" width="40" height="40" aria-hidden>
+                    <circle cx="20" cy="20" r="15" fill="none" stroke="#fff" strokeOpacity=".35" strokeWidth="3" />
+                    <circle cx="20" cy="20" r="9.500" fill="none" stroke="#fff" strokeOpacity=".6" strokeWidth="3" />
+                    <circle cx="20" cy="20" r="4" fill="#fff" />
+                  </svg>
+                </AppTile>
+              }
+            />
+            <Cell
+              label="メッセージ"
+              icon={
+                <AppTile from="#6BE56F" to="#2DBE4A">
+                  <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden>
+                    <path d="M12 4C7 4 3 7.200 3 11.200c0 2.200 1.200 4.100 3.100 5.400-.1 1-.6 2-1.400 2.800 1.600-.1 3-.7 4-1.500.8.200 1.500.3 2.300.3 5 0 9-3.200 9-7.200S17 4 12 4z" fill="#fff" />
+                  </svg>
+                </AppTile>
+              }
+            />
+            <Cell
+              label="メール"
+              icon={
+                <AppTile from="#4C9BFF" to="#1F6FEB">
+                  <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden>
+                    <rect x="3" y="6" width="18" height="12.500" rx="2.200" fill="#fff" />
+                    <path d="M3.800 7.600l8.200 6 8.200-6" fill="none" stroke="#3B82F6" strokeWidth="1.400" strokeLinejoin="round" />
+                  </svg>
+                </AppTile>
+              }
+            />
+            <Cell
+              label="LINE"
+              icon={
+                <AppTile from="#2FD36B" to="#06B650">
+                  <svg viewBox="0 0 40 40" width="40" height="40" aria-hidden>
+                    <path d="M20 8C12.800 8 7 12.500 7 18c0 4.900 4.600 9 10.800 9.800.4.100 1 .3 1.100.7.100.3.100.8 0 1.100l-.2 1c-.1.300-.3 1.300 1.200.7s8.100-4.800 11-8.200C32.900 21.300 33 19.700 33 18c0-5.500-5.800-10-13-10z" fill="#fff" />
+                    <text x="20" y="21.500" textAnchor="middle" fontSize="7.500" fontWeight="800" fill="#06C755" fontFamily="Arial, sans-serif">LINE</text>
+                  </svg>
+                </AppTile>
+              }
+            />
+          </div>
+
+          <div className="grid grid-cols-4 gap-x-1 pt-2.5">
+            <Cell label="コピー" icon={<ActionCircle><rect x="8" y="8" width="11" height="12" rx="2" /><path d="M5 15V6a2 2 0 0 1 2-2h8" /></ActionCircle>} />
+            <Cell label="新規クイックメモ" icon={<ActionCircle><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M8 15c1.500-4 2.500-6 3.500-3s1.500 3 3.500-2" /></ActionCircle>} />
+            <Cell label={"“ファイル”に保存"} icon={<ActionCircle><path d="M3.500 7.500a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z" /></ActionCircle>} />
+            <Cell label="表示を増やす" icon={<ActionCircle><path d="M6 9.500l6 6 6-6" /></ActionCircle>} />
+          </div>
+        </div>
+      </div>
+    </Frame>
+  );
+}
+
+// 2. LINEの転送画面
+function Forward() {
+  return (
+    <Frame label="LINEの転送画面で「おく」を選び、転送を押す（サンプル）" bg="#FFFFFF">
+      <div className="flex items-center justify-between px-3 pt-3">
+        <span className="grid size-7 place-items-center rounded-full" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.12)", border: "1px solid #E3E3E6", background: "linear-gradient(180deg,#FFFFFF,#F4F4F6)" }}><X className="size-3.5" aria-hidden /></span>
+        <span className="text-[11px] font-extrabold text-black">選択中 1</span>
+        <span className="rounded-full px-3 py-1 text-[11px] font-bold" style={{ color: "#4A6CF7", boxShadow: "0 1px 4px rgba(0,0,0,0.12)", border: "1px solid #E3E3E6", background: "linear-gradient(180deg,#FFFFFF,#F4F4F6)" }}>転送</span>
+      </div>
+      <p className="px-3 pt-3 text-[10px] font-bold" style={{ color: "#666" }}>最近の履歴</p>
+      {[true, false, false, false].map((checked, i) => (
+        <div key={i} className="flex items-center gap-2.5 px-3 py-1.5">
+          {i === 0 ? <OkuIcon size={32} badge={false} /> : <Dummy size={32} />}
+          <span className="flex-1 text-[11px]" style={{ color: i === 0 ? "#111" : "#666" }}>{i === 0 ? "おく" : "友だち"}</span>
+          <span className="grid size-5 place-items-center rounded-full border" style={checked ? { background: LINE_GREEN, borderColor: LINE_GREEN } : undefined}>
+            {checked && <Check className="size-3 text-white" aria-hidden />}
+          </span>
+        </div>
+      ))}
+    </Frame>
+  );
+}
+
+const steps = [
+  {
+    title: "出品ページで、共有ボタンを押す",
+    body: "ヤフオク・PayPayフリマ・ジモティー・メルカリで共有。友だちの並びに「おく」が出ます。",
+    mock: <ShareSheet />,
+  },
+  {
+    title: "「おく」を選んで、転送",
+    body: "LINEの転送画面で「おく」にチェックして、転送を押します。",
+    mock: <Forward />,
+  },
+  {
+    title: "おくが、自動で保存",
+    body: "数秒で「保存しました」の返信が届きます。写真と価格も一緒に残ります。",
+    mock: (
+      <div className="mt-3">
+        <LineChatPhone maxWidth={250} />
+      </div>
+    ),
+  },
+  {
+    title: "あとからアプリで見る",
+    body: "保存した出品は、一覧にカードで並びます。オークションや出品が終わっても残ります。",
+    mock: (
+      <div className="mx-auto mt-3 w-full max-w-[320px]">
+        <AppCard />
+      </div>
+    ),
+  },
+];
+
 export function LandingLineFlow() {
   return (
-    <ol className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-      <StepCard step={1} title="出品ページで「共有」を押す" caption="ヤフオク・PayPayフリマ・ジモティー・メルカリの共有ボタンを押します。">
-        <ListingScreen />
-      </StepCard>
-
-      <StepCard step={2} title="共有先から「LINE」を選ぶ" caption="出てきた共有メニューで、LINEのアイコンをタップします。">
-        <ShareSheetScreen />
-      </StepCard>
-
-      <StepCard step={3} title="「おく」を選んで送信" caption="送信先に公式LINE「おく」を選んで、そのまま送ります。">
-        <LinePickerScreen />
-      </StepCard>
-
-      <StepCard step={4} title="数秒でカードが届いて保存完了" caption="タイトル・価格・写真が自動で保存され、いつでも見返せます。">
-        <LineChatScreen />
-      </StepCard>
-    </ol>
-  );
-}
-
-function StepCard({
-  step,
-  title,
-  caption,
-  children,
-}: {
-  step: number;
-  title: string;
-  caption: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <li className="flex flex-col rounded-2xl border border-border bg-card p-3.5">
-      <div className="flex items-center gap-2">
-        <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full bg-[#ffdc00] text-xs font-extrabold text-black">
-          {step}
-        </span>
-        <p className="text-sm font-bold leading-snug text-ink">{title}</p>
+    <section id="line-flow" className="scroll-mt-4 px-4 py-8 sm:px-7" style={{ background: "#FFFFFF" }}>
+      <div id="how" className="mx-auto max-w-6xl">
+        <h2 className="text-sm font-bold tracking-[0.08em]" style={{ color: "#B45309" }}>使い方</h2>
+        <p className="mt-1 text-lg font-bold text-ink">LINEで共有するだけ</p>
+        <p className="mt-1.5 text-sm leading-7" style={{ color: "#6B6560" }}>
+          iPhoneは共有ボタンから「LINE」→「おく」を選ぶだけ。Androidも共有メニューから同じように送れます。
+        </p>
+        <ol className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {steps.map((step, i) => (
+            <li key={step.title} className="min-w-0 rounded-2xl border border-[#F3E5AB] p-4" style={{ background: "#FFF8D6" }}>
+              <p className="flex items-center gap-2">
+                <span className="grid size-6 shrink-0 place-items-center rounded-full text-xs font-extrabold text-black" style={{ background: YELLOW }}>
+                  {i + 1}
+                </span>
+                <span className="text-sm font-bold text-ink">{step.title}</span>
+              </p>
+              <p className="mt-1.5 text-xs leading-6" style={{ color: "#6B6560" }}>{step.body}</p>
+              {step.mock}
+            </li>
+          ))}
+        </ol>
       </div>
-      <div className="my-3 flex flex-1 items-center justify-center">{children}</div>
-      <p className="text-xs leading-5 text-muted">{caption}</p>
-    </li>
+    </section>
   );
 }
 
-function PhoneFrame({ header, children }: { header: React.ReactNode; children: React.ReactNode }) {
+// iPhone風の枠でLINEトークをしている図（コマ③で使用）
+export function LineChatPhone({ maxWidth = 290 }: { maxWidth?: number }) {
   return (
     <div
-      className="w-full max-w-[210px] overflow-hidden rounded-2xl border-2 bg-white shadow-xs"
-      style={{ borderColor: "#E5E0DA" }}
-      aria-hidden="true"
+      role="img"
+      aria-label="LINEで「おく」にURLを送ると、保存しましたと返信が届くトーク画面（サンプル）"
+      className="mx-auto w-full rounded-[44px] p-[9px]"
+      style={{ maxWidth, background: "#1C1917", boxShadow: "0 0 0 2px #8A8580, 0 14px 30px rgba(0,0,0,0.18)" }}
     >
-      <div className="border-b px-2.5 py-1.5 text-[10px] font-bold" style={{ borderColor: "#EFEAE3", background: "#FAF7F2" }}>
-        {header}
-      </div>
-      <div className="p-2.5 text-[11px]">{children}</div>
-    </div>
-  );
-}
-
-function ListingScreen() {
-  return (
-    <PhoneFrame
-      header={
-        <div className="flex items-center justify-between text-muted">
-          <span className="truncate">auctions.yahoo.co.jp</span>
+      <div className="relative overflow-hidden rounded-[36px]" style={{ background: "#7F9FCB" }}>
+        <div className="absolute top-2 left-1/2 z-10 h-[22px] w-[84px] -translate-x-1/2 rounded-full" style={{ background: "#0B0B0B" }} />
+        <div className="flex items-center justify-between px-6 pt-2.5 pb-1 text-[11px] font-bold" style={{ background: "#7F9FCB", color: "#111" }}>
+          <span>12:52</span>
+          <span className="text-[9px]">●●●● ▮</span>
         </div>
-      }
-    >
-      <div className="rounded-lg bg-[#fff8d6] p-2">
-        <div className="h-9 rounded bg-white/80" />
-        <p className="mt-1.5 truncate text-[10px] font-bold text-ink">SONY α7 IV ボディ 美品</p>
-        <p className="text-[11px] font-extrabold text-ink">現在 248,000円</p>
-      </div>
-      <div className="mt-2 flex items-center justify-between rounded-lg border-2 border-[#ffdc00] bg-[#fff8d6] px-2.5 py-1.5">
-        <span className="text-[10px] font-bold text-ink">この出品を共有</span>
-        <span className="inline-flex items-center gap-1 rounded-full bg-[#ffdc00] px-2 py-0.5 text-[10px] font-bold text-black">
-          共有
-        </span>
-      </div>
-    </PhoneFrame>
-  );
-}
-
-function ShareSheetScreen() {
-  return (
-    <PhoneFrame header={<span className="text-muted">共有メニュー</span>}>
-      <div className="space-y-2">
-        <p className=" truncate rounded bg-background px-2 py-1 text-[9px] text-muted">
-          SONY α7 IV ボディ https://auctions.yahoo...
-        </p>
-        <div className="grid grid-cols-4 gap-1.5 pt-1 text-center text-[9px]">
-          <div className="flex flex-col items-center rounded-lg p-1 ring-2 ring-[#06C755]" style={{ background: "#EAFBF0" }}>
-            <span className="flex size-7 items-center justify-center rounded-xl text-[9px] font-extrabold text-white" style={{ background: "#06C755" }}>
-              LINE
-            </span>
-            <span className="mt-0.5 font-bold" style={{ color: "#057A35" }}>LINE</span>
-          </div>
-          <AppIcon label="コピー" bg="#E4E4E7" />
-          <AppIcon label="メール" bg="#DBEAFE" />
-          <AppIcon label="その他" bg="#F4F4F5" />
+        <div className="flex items-center gap-2 px-3 pt-3 pb-2" style={{ color: "#111" }}>
+          <ChevronLeft className="size-4" aria-hidden />
+          <span className="flex-1 text-[12px] font-bold">おく</span>
+          <Search className="size-3.5" aria-hidden />
+          <PhoneIcon className="size-3.5" aria-hidden />
+          <Menu className="size-3.5" aria-hidden />
         </div>
-      </div>
-    </PhoneFrame>
-  );
-}
-
-function AppIcon({ label, bg }: { label: string; bg: string }) {
-  return (
-    <div className="flex flex-col items-center p-1 text-muted">
-      <span className="size-7 rounded-xl" style={{ background: bg }} />
-      <span className="mt-0.5">{label}</span>
-    </div>
-  );
-}
-
-function LinePickerScreen() {
-  return (
-    <PhoneFrame
-      header={
-        <div className="flex items-center justify-between">
-          <span style={{ color: "#06C755" }}>LINE · 送信先を選択</span>
-          <span className="rounded px-1.5 py-0.5 text-[9px] font-bold text-white" style={{ background: "#06C755" }}>
-            転送
-          </span>
-        </div>
-      }
-    >
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between rounded-lg border-2 p-1.5" style={{ borderColor: "#06C755", background: "#EAFBF0" }}>
-          <div className="flex items-center gap-1.5">
-            <span className="flex size-6 items-center justify-center rounded-full bg-[#ffdc00] text-[10px] font-extrabold text-black">
-              おく
-            </span>
-            <div>
-              <p className="text-[10px] font-bold leading-tight text-ink">おく</p>
-              <p className="text-[8px] text-muted">公式アカウント</p>
+        <div className="flex flex-col gap-2.5 px-2.5 pt-1 pb-4">
+          <span className="mx-auto rounded-full px-2.5 py-0.5 text-[9px] text-white" style={{ background: "rgba(0,0,0,0.25)" }}>今日</span>
+          <div className="flex items-end justify-end gap-1">
+            <span className="text-right text-[8px] leading-3" style={{ color: "#33425e" }}>既読<br />12:52</span>
+            <div className="max-w-[72%] rounded-2xl rounded-tr-sm px-3 py-2 text-[10px] leading-4 break-all" style={{ background: "#6FE87A", color: "#111" }}>
+              https://page.auctions.yahoo.co.jp/...
             </div>
           </div>
-          <span className="flex size-4 items-center justify-center rounded-full text-[9px] font-bold text-white" style={{ background: "#06C755" }}>
-            ✓
-          </span>
+          <div className="flex items-start gap-1.5">
+            <OkuIcon size={28} badge={false} />
+            <div className="flex min-w-0 flex-1 items-end gap-1">
+              <div className="min-w-0 flex-1 overflow-hidden rounded-2xl rounded-tl-sm bg-white">
+                <div className="relative flex aspect-[16/10] w-full items-center justify-center bg-gradient-to-br from-[#fff8d6] via-[#ffef99] to-[#ffdc00]/60">
+                  <CameraIllustration className="h-14 w-24 text-ink/85" />
+                </div>
+                <div className="border-t-2 px-2.5 py-2" style={{ borderColor: YELLOW }}>
+                  <p className="text-[10px] font-bold" style={{ color: "#B45309" }}>保存しました</p>
+                  <p className="line-clamp-2 text-[11px] leading-tight font-bold text-ink">美品 SONY α7 IV ILCE-7M4 ボディ</p>
+                  <p className="mt-1 text-[10px] text-ink">
+                    <span className="font-extrabold">248,000円</span> ・ <span className="font-bold text-live">出品中</span>
+                  </p>
+                </div>
+              </div>
+              <span className="shrink-0 text-[8px]" style={{ color: "#33425e" }}>12:52</span>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5 rounded-lg px-1.5 py-1 opacity-50">
-          <span className="size-6 rounded-full bg-zinc-200" />
-          <span className="text-[10px] text-muted">友だち A</span>
+        <div className="flex items-center gap-2 bg-white px-3 pt-2 pb-5" style={{ color: "#555" }}>
+          <Plus className="size-4" aria-hidden />
+          <Camera className="size-4" aria-hidden />
+          <ImageIcon className="size-4" aria-hidden />
+          <span className="flex-1 rounded-full px-3 py-1 text-[10px]" style={{ background: "#EDEDED", color: "#aaa" }}>Aa</span>
+          <Mic className="size-4" aria-hidden />
         </div>
+        <div className="absolute bottom-1.5 left-1/2 h-1 w-[90px] -translate-x-1/2 rounded-full" style={{ background: "#111" }} />
       </div>
-    </PhoneFrame>
-  );
-}
-
-function LineChatScreen() {
-  return (
-    <PhoneFrame header={<span style={{ color: "#06C755" }}>LINE · おく</span>}>
-      <div className="space-y-1.5 rounded-lg p-2" style={{ background: "#8CABD9" }}>
-        <div className="ml-auto max-w-[85%] rounded-xl px-2 py-1 text-[9px] font-medium" style={{ background: "#8DE055", color: "#1B1917" }}>
-          https://auctions.yahoo.co.jp/...
-        </div>
-        <div className="max-w-[92%] rounded-xl bg-white p-1.5 shadow-2xs">
-          <p className="text-[9px] font-bold text-muted">おくったよ</p>
-          <p className="truncate text-[10px] font-bold text-ink">SONY α7 IV ボディ</p>
-          <p className="text-[9px] text-muted">現在価格: 248,000円</p>
-          <p className="mt-1 rounded bg-[#ffdc00] py-0.5 text-center text-[9px] font-bold text-black">
-            おくで見る
-          </p>
-        </div>
-      </div>
-    </PhoneFrame>
+    </div>
   );
 }

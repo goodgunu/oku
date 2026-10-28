@@ -66,6 +66,7 @@ export function ShareXSheet({
     setBusy(true);
     setError("");
     setCopied(false);
+    // PCは、操作の直後に空の窓を開けておく（あとで投稿画面に切り替える。ポップアップ対策）
     const mobile = isMobile();
     const popup = !mobile && mode === "x" ? window.open("", "_blank") : null;
     try {
@@ -148,8 +149,8 @@ export function ShareXSheet({
         </div>
         <p className="text-xs leading-5 text-muted">
           {mode === "x"
-            ? "押すと、この出品の共有ページ（自分のメモは出ません）ができて、Xの投稿画面が開きます。"
-            : "押すと、この出品の共有ページ（自分のメモは出ません）ができて、共有メニューまたはURLコピーができます。"}
+            ? "押すと、この出品の共有ページ（メモは出ません）ができて、Xの投稿画面が開きます。"
+            : "押すと、この出品の共有ページ（メモは出ません）ができて、端末の共有メニューが開きます。"}
         </p>
 
         <label className="block">
@@ -160,8 +161,8 @@ export function ShareXSheet({
             value={comment}
             maxLength={COMMENT_LIMIT}
             onChange={(event) => setComment(event.target.value)}
-            placeholder="例: これ状態良さそう"
-            className="mt-1 h-10 w-full rounded-lg border border-border bg-background px-3 text-sm"
+            placeholder="例: これ状態良さそう。"
+            className="mt-1 h-10 w-full rounded-lg border border-border bg-background px-3 text-base text-ink outline-none focus:border-ink"
           />
         </label>
 
@@ -187,7 +188,7 @@ export function ShareXSheet({
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={photoSrcOf(record, index)} alt="" loading="lazy" className="size-full object-cover" />
                     {order >= 0 && (
-                      <span className="absolute top-1 right-1 grid size-5 place-items-center rounded-full bg-[#ffdc00] text-[11px] font-bold text-black">
+                      <span className="absolute top-1 right-1 grid size-5 place-items-center rounded-full bg-[#ffdc00] text-[11px] font-bold text-black shadow-2xs">
                         {order + 1}
                       </span>
                     )}
@@ -213,10 +214,20 @@ export function ShareXSheet({
           <p className={`mt-1 text-right text-xs tabular-nums ${over ? "font-bold text-red-600" : "text-muted"}`}>
             {length} / {X_LIMIT}
           </p>
+          {over && (
+            <p className="text-xs font-bold text-red-600">
+              Xの文字数（日本語は1文字=2）を超えています。ひとことを短くしてください。
+            </p>
+          )}
         </div>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
-        {copied && <p className="text-center text-sm font-bold text-emerald-700">共有URLをコピーしました</p>}
+        <p className="text-[11px] leading-5 text-muted">
+          {mode === "x"
+            ? "スマホでは、選んだ写真をつけてXアプリに渡します。つけられないときは、リンクカードつきの投稿画面を開きます。"
+            : "選んだ写真と本文を、端末の共有メニューに渡します。共有メニューを使えないときは、共有ページのURLをコピーします。"}
+        </p>
+        {copied && <p className="text-center text-sm font-bold text-[#05813A]">コピーしました</p>}
 
         <button
           type="button"
@@ -225,7 +236,7 @@ export function ShareXSheet({
           onClick={() => void share()}
         >
           {busy ? (
-            "準備しています…"
+            "準備しています"
           ) : mode === "x" ? (
             <>
               <XIcon className="mr-1.5 size-4" />

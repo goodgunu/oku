@@ -1,4 +1,3 @@
-import { ArchiveForm } from "@/components/archive-form";
 import { LibraryList } from "@/components/library-list";
 import { LineAddCard } from "@/components/line-add-card";
 import { LoginGate } from "@/components/login-gate";
@@ -15,17 +14,14 @@ export default async function HomePage() {
   const listings = await listRecords(user.folder);
 
   return (
-    <div className="space-y-6">
-      <ArchiveForm />
+    <div className="space-y-6 pb-16">
       <section className="space-y-3">
-        <div className="flex items-baseline justify-between border-b-2 border-yahoo pb-2">
-          <h2 className="text-lg font-bold text-ink">保存した一覧</h2>
-          <span className="text-xs font-medium text-muted">{listings.length}件</span>
-        </div>
         <LibraryList listings={listings} />
       </section>
       <NotifySettingCard />
-      <LineAddCard />
+      <div id="line-add-card" className="scroll-mt-4">
+        <LineAddCard />
+      </div>
     </div>
   );
 }

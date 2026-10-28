@@ -11,6 +11,12 @@ import { priceChange } from "@/lib/price-history";
 import { sourceLabel } from "@/lib/source-labels";
 import type { ArchiveRecord } from "@/lib/types";
 
+type ArchiveResponse = {
+  status: "ok" | "ended" | "error";
+  message?: string;
+  record?: ArchiveRecord;
+};
+
 export function LibraryList({ listings: initialListings }: { listings: ArchiveRecord[] }) {
   const router = useRouter();
   const [listings, setListings] = useState<ArchiveRecord[]>(initialListings);
@@ -21,18 +27,45 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortState>(DEFAULT_SORT);
   const [compareIds, setCompareIds] = useState<string[]>([]);
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareNotice, setCompareNotice] = useState<string | null>(null);
   const [now] = useState(() => Date.now());
+
+  // 折りたたみ式「＋ URLから直接追加」フォーム
+  const [showAdd, setShowAdd] = useState<boolean>(() => initialListings.length === 0);
+  const [addUrl, setAddUrl] = useState("");
+  const [addBusy, setAddBusy] = useState(false);
+  const [addMessage, setAddMessage] = useState<string | null>(null);
+  const [addError, setAddError] = useState<string | null>(null);
 
   useEffect(() => {
     setListings(initialListings);
+    if (initialListings.length === 0) {
+      setShowAdd(true);
+    }
   }, [initialListings]);
 
   useEffect(() => {
-    setCompareIds(readCompare());
+    const savedCompare = readCompare();
+    setCompareIds(savedCompare);
+    if (savedCompare.length > 0) {
+      setCompareMode(true);
+    }
+    try {
+      const pending = sessionStorage.getItem("oku-pending-url") || "";
+      if (pending) {
+        sessionStorage.removeItem("oku-pending-url");
+        setAddUrl(pending);
+        setShowAdd(true);
+      }
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   const counts = countByFilter(listings, now);
   const srcCounts = sourceCounts(listings, statusFilter, query, favoritesOnly, now);
+  const favoriteCount = listings.filter((item) => item.favorite).length;
 
   const filtered = listings.filter((item) => {
     if (statusFilter !== "all" && classify(item, now) !== statusFilter) return false;
@@ -43,6 +76,43 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
   });
 
   const shown = sortListings(filtered, sort);
+
+  async function onAddSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    const target = addUrl.trim();
+    if (!target || addBusy) return;
+    setAddBusy(true);
+    setAddMessage(null);
+    setAddError(null);
+    try {
+      const response = await fetch("/api/archive", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({ url: target }),
+        cache: "no-store",
+      });
+      const data = (await response.json()) as ArchiveResponse;
+      if (data.status === "error") {
+        setAddError(data.message || "保存できませんでした。");
+        return;
+      }
+      const note = data.status === "ended" ? "（終了済みとして保存）" : "";
+      setAddMessage(`保存しました${note}: ${data.record?.title || data.record?.id}`);
+      setAddUrl("");
+      if (data.record) {
+        const rec = data.record;
+        setListings((prev) => [rec, ...prev.filter((item) => item.id !== rec.id)]);
+      }
+      router.refresh();
+      if (data.record?.id) {
+        router.push(`/listings/${data.record.id}`);
+      }
+    } catch {
+      setAddError("通信に失敗しました。もう一度試してください。");
+    } finally {
+      setAddBusy(false);
+    }
+  }
 
   async function remove(id: string) {
     if (!confirm("このメモを消しますか？")) return;
@@ -70,230 +140,387 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
   }
 
   function toggleCompare(id: string) {
-    const next = compareIds.includes(id)
-      ? compareIds.filter((x) => x !== id)
-      : [...compareIds, id].slice(-3);
+    setCompareNotice(null);
+    if (compareIds.includes(id)) {
+      const next = compareIds.filter((x) => x !== id);
+      setCompareIds(next);
+      writeCompare(next);
+      return;
+    }
+    if (compareIds.length >= 4) {
+      setCompareNotice("比べられるのは4件までです。");
+      return;
+    }
+    const next = [...compareIds, id].slice(0, 4);
     setCompareIds(next);
     writeCompare(next);
   }
 
-  if (!listings.length) {
-    return (
-      <div className="rounded-xl border border-dashed border-border bg-card px-5 py-12 text-center text-sm text-muted">
-        まだ何もおくっていません。上のフォームにURLを貼るか、LINEから共有してください。
-      </div>
-    );
-  }
+  const hasExtraFilter = statusFilter !== "all" || sourceFilter !== "all" || favoritesOnly || Boolean(query.trim());
 
   return (
-    <div className="space-y-3">
-      {/* サイト別タブ */}
-      <div className="flex flex-wrap gap-1.5 border-b border-border pb-2.5">
-        {SOURCE_TABS.map((tab) => {
-          const active = sourceFilter === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setSourceFilter(tab.id)}
-              className={`rounded-full border px-3 py-1 text-xs font-bold transition ${
-                active
-                  ? "border-[#ffdc00] bg-[#ffdc00] text-black"
-                  : "border-border bg-card text-muted hover:text-ink"
-              }`}
-            >
-              {tab.label} <span className="tabular-nums opacity-80">{srcCounts[tab.id] ?? 0}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* ステータス＋お気に入り＋検索＋並び替え */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
+    <div className="space-y-4">
+      {/* 上部バー: タイトル・件数 ＋ アクションボタン（＋ URLから直接追加 / 使い方（LINE）） */}
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[#ffdc00] pb-2.5">
+        <div className="flex items-baseline gap-2">
+          <h2 className="text-lg font-bold text-ink">ライブラリ</h2>
+          <span className="text-xs font-medium text-muted">{listings.length}件</span>
+        </div>
         <div className="flex flex-wrap items-center gap-1.5">
-          {([
-            ["all", "すべて"],
-            ["live", "出品中"],
-            ["ended", "終了"],
-          ] as const).map(([k, label]) => (
-            <button
-              key={k}
-              type="button"
-              onClick={() => setStatusFilter(k)}
-              className={`rounded-full border px-3 py-1.5 text-xs font-bold ${
-                statusFilter === k
-                  ? "border-ink bg-ink text-white"
-                  : "border-border bg-card text-muted hover:text-ink"
-              }`}
-            >
-              {label} {counts[k]}
-            </button>
-          ))}
           <button
             type="button"
-            onClick={() => setFavoritesOnly((v) => !v)}
-            aria-pressed={favoritesOnly}
-            className={`rounded-full border px-3 py-1.5 text-xs font-bold ${
-              favoritesOnly
-                ? "border-[#ffdc00] bg-[#fff8d6] text-ink"
-                : "border-border bg-card text-muted hover:text-ink"
+            aria-expanded={showAdd}
+            onClick={() => setShowAdd((v) => !v)}
+            className={`inline-flex h-8 items-center gap-1 rounded-full border px-3 text-xs font-bold transition ${
+              showAdd
+                ? "border-ink bg-ink text-white"
+                : "border-[#ffdc00] bg-[#ffdc00] text-black hover:bg-[#f5c400]"
             }`}
           >
-            ♥ お気に入り
+            {showAdd ? "× 閉じる" : "＋ URLから直接追加"}
           </button>
-        </div>
-
-        <div className="flex flex-1 flex-wrap items-center justify-end gap-2 sm:flex-initial">
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="タイトル・出品者・メモで検索"
-            className="h-9 min-w-[160px] flex-1 rounded-full border border-border bg-card px-3.5 text-xs outline-none focus:border-ink sm:w-52 sm:flex-initial"
-          />
-          <select
-            aria-label="並べ替え"
-            value={presetIdOf(sort)}
-            onChange={(e) => {
-              const found = SORT_PRESETS.find((p) => p.id === e.target.value);
-              if (found) setSort(found.sort);
-            }}
-            className="h-9 rounded-full border border-border bg-card px-3 text-xs font-bold text-ink outline-none"
+          <a
+            href="#line-add-card"
+            className="inline-flex h-8 items-center rounded-full border border-border bg-card px-3 text-xs font-bold text-ink hover:bg-[#FFF8D6]"
           >
-            {SORT_PRESETS.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.label}
-              </option>
-            ))}
-          </select>
+            使い方（LINE）
+          </a>
         </div>
       </div>
 
-      {shown.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border bg-card px-5 py-8 text-center text-sm text-muted">
-          該当するものはありません。
-        </div>
-      ) : null}
-
-      <ul className="space-y-3">
-        {shown.map((item) => {
-          const first = item.photos[0];
-          const thumb = first?.key ? `/api/photo/${item.id}/0` : first?.url;
-          const change = priceChange(item);
-          const compared = compareIds.includes(item.id);
-          return (
-            <li
-              key={item.id}
-              className="flex gap-3 rounded-xl border border-border bg-card p-3 shadow-sm transition hover:border-ink/20 sm:p-4"
+      {/* 折りたたみ URL 追加フォーム */}
+      {showAdd && (
+        <form
+          onSubmit={onAddSubmit}
+          className="rounded-2xl border border-[#F3E5AB] bg-[#FFF8D6]/60 p-4 shadow-xs sm:p-5"
+        >
+          <label htmlFor="yahoo-url" className="mb-2 block text-sm font-bold text-ink">
+            出品ページのURL（ヤフオク・PayPayフリマ・ジモティー・メルカリ）
+          </label>
+          <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
+            <input
+              id="yahoo-url"
+              type="url"
+              required
+              value={addUrl}
+              onChange={(e) => setAddUrl(e.target.value)}
+              placeholder="ヤフオク・PayPayフリマ・ジモティー・メルカリのURL"
+              className="h-11 min-w-0 flex-1 rounded-lg border border-border bg-white px-3 text-sm text-ink outline-none focus:border-ink focus:ring-2 focus:ring-[#ffdc00]"
+              inputMode="url"
+              autoCapitalize="off"
+              autoCorrect="off"
+            />
+            <button
+              type="submit"
+              disabled={addBusy}
+              className="h-11 shrink-0 rounded-lg bg-[#ffdc00] px-6 text-sm font-extrabold text-black shadow-xs hover:bg-[#f5c400] disabled:opacity-60"
             >
-              <Link href={`/listings/${item.id}`} className="flex min-w-0 flex-1 gap-3">
-                <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-background sm:h-24 sm:w-24">
-                  {thumb ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={thumb} alt="" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full items-center justify-center bg-yahoo/40 text-xs font-bold text-ink/50">
-                      おく
-                    </div>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="mb-1 flex flex-wrap items-center gap-1.5">
-                    <AvailabilityBadge value={item.availability} />
-                    <span className="rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-bold text-ink/70">
-                      {sourceLabel(item.source)}
-                    </span>
-                    {item.watchStatus && item.watchStatus !== "watching" && (
-                      <span className="rounded-full bg-[#fff8d6] px-2 py-0.5 text-[10px] font-bold text-ink">
-                        {WATCH_STATUS_LABELS[item.watchStatus]}
-                      </span>
-                    )}
-                    {change && (
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                          change.direction === "down"
-                            ? "bg-emerald-100 text-emerald-800"
-                            : "bg-amber-100 text-amber-900"
+              {addBusy ? "おくっています…" : "おく"}
+            </button>
+          </div>
+          {addMessage && <p className="mt-3 text-sm font-medium text-live">{addMessage}</p>}
+          {addError && <p className="mt-3 text-sm font-medium text-ended">{addError}</p>}
+          <p className="mt-3 text-xs leading-relaxed text-muted">
+            出品が生きているうちにURLを貼ると、タイトル・価格・写真などをメモとして残します。各アプリの共有からLINEの「おく」へ送ることもできます。
+          </p>
+        </form>
+      )}
+
+      {listings.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-border bg-card px-5 py-12 text-center text-sm leading-7 text-muted">
+          まだ何も残っていません。上のフォームにURLを貼るか、LINEから共有してください。
+        </div>
+      ) : (
+        <>
+          {/* サイト別タブ */}
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label="サイトで絞る">
+            {SOURCE_TABS.map((tab) => {
+              const active = sourceFilter === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  aria-pressed={active}
+                  data-source-filter={tab.id}
+                  onClick={() => setSourceFilter(tab.id)}
+                  className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-bold transition ${
+                    active
+                      ? "border-[#ffdc00] bg-[#ffdc00] text-black shadow-2xs"
+                      : "border-border bg-card text-muted hover:text-ink"
+                  }`}
+                >
+                  {tab.label}（{srcCounts[tab.id] ?? 0}）
+                </button>
+              );
+            })}
+          </div>
+
+          {/* ステータス＋お気に入り＋比較トグル＋検索＋並び替え */}
+          <div className="flex flex-col gap-2.5 rounded-2xl border border-border bg-card p-3 sm:p-3.5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <div
+                  className="inline-grid grid-cols-3 overflow-hidden rounded-lg border border-border shadow-2xs"
+                  role="group"
+                  aria-label="出品の状態"
+                >
+                  {(
+                    [
+                      ["all", "すべて"],
+                      ["live", "出品中"],
+                      ["ended", "終了"],
+                    ] as const
+                  ).map(([k, label], idx) => {
+                    const active = statusFilter === k;
+                    return (
+                      <button
+                        key={k}
+                        type="button"
+                        aria-pressed={active}
+                        onClick={() => setStatusFilter(k)}
+                        className={`h-9 px-2.5 text-xs font-bold transition ${idx ? "border-l border-border" : ""} ${
+                          active ? "bg-[#ffdc00] text-black" : "bg-card text-muted hover:text-ink"
                         }`}
                       >
-                        {change.deltaText}
-                      </span>
-                    )}
-                  </div>
-                  <p className="line-clamp-2 text-sm font-bold leading-snug text-ink">{item.title}</p>
-                  {item.priceLabel && item.priceLabel !== "—" ? (
-                    <p className="mt-1.5 text-base font-bold text-ink">
-                      {item.priceLabel}
-                      {item.bidCount != null ? (
-                        <span className="ml-2 text-xs font-medium text-muted">入札 {item.bidCount}</span>
-                      ) : null}
-                    </p>
-                  ) : null}
-                  <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-xs text-muted">
-                    {item.endTimeLabel && <span>終了 {item.endTimeLabel}</span>}
-                    {item.condition && <span>状態: {item.condition}</span>}
-                    {item.shipping && <span>{item.shipping}</span>}
-                  </div>
-                </div>
-              </Link>
-
-              <div className="flex shrink-0 flex-col items-end justify-between gap-1">
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() => void toggleFavorite(item)}
-                    aria-label={item.favorite ? "お気に入りから外す" : "お気に入りに入れる"}
-                    className={`rounded-full px-2 py-1 text-sm ${
-                      item.favorite ? "text-amber-500" : "text-muted/50 hover:text-ink"
-                    }`}
-                  >
-                    {item.favorite ? "♥" : "♡"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => remove(item.id)}
-                    disabled={busyId === item.id}
-                    className="rounded-md px-2 py-1 text-xs text-muted hover:bg-background hover:text-ended"
-                  >
-                    消す
-                  </button>
+                        {label} <span className="tabular-nums opacity-80">{counts[k]}</span>
+                      </button>
+                    );
+                  })}
                 </div>
 
-                <label className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-border bg-background px-2.5 py-1 text-[11px] font-bold text-ink select-none">
-                  <input
-                    type="checkbox"
-                    checked={compared}
-                    onChange={() => toggleCompare(item.id)}
-                    className="accent-black"
-                  />
-                  比べる
-                </label>
+                <button
+                  type="button"
+                  onClick={() => setFavoritesOnly((v) => !v)}
+                  aria-pressed={favoritesOnly}
+                  data-control="favorites"
+                  className={`inline-flex h-9 items-center gap-1 rounded-lg border px-3 text-xs font-bold transition ${
+                    favoritesOnly
+                      ? "border-[#ffdc00] bg-[#fff8d6] text-ink"
+                      : "border-border bg-card text-muted hover:text-ink"
+                  }`}
+                >
+                  <span className={favoritesOnly ? "text-amber-500" : ""}>{favoritesOnly ? "♥" : "♡"}</span>
+                  お気に入り（{favoriteCount}）
+                </button>
+
+                <button
+                  type="button"
+                  aria-pressed={compareMode || compareIds.length > 0}
+                  onClick={() => setCompareMode((v) => !v)}
+                  className={`inline-flex h-9 items-center gap-1 rounded-lg border px-3 text-xs font-bold transition ${
+                    compareMode || compareIds.length > 0
+                      ? "border-ink bg-ink text-white"
+                      : "border-border bg-card text-muted hover:text-ink"
+                  }`}
+                >
+                  2〜4件を選んで比較
+                </button>
               </div>
-            </li>
-          );
-        })}
-      </ul>
 
-      {compareIds.length > 0 && (
-        <div className="sticky bottom-4 z-30 mx-auto flex max-w-md items-center justify-between gap-3 rounded-full border border-black/20 bg-ink px-4 py-2.5 text-xs font-bold text-white shadow-lg">
-          <span>比べる出品：{compareIds.length} / 3件</span>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setCompareIds([]);
-                writeCompare([]);
-              }}
-              className="text-white/70 underline hover:text-white"
-            >
-              クリア
-            </button>
-            <Link
-              href="/compare"
-              className="rounded-full bg-[#ffdc00] px-3.5 py-1 text-xs font-extrabold text-black"
-            >
-              並べて比べる
-            </Link>
+              <div className="flex flex-1 flex-wrap items-center justify-end gap-2 sm:flex-initial">
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="タイトル・出品者・メモで検索"
+                  className="h-9 min-w-[160px] flex-1 rounded-lg border border-border bg-background px-3 text-xs text-ink outline-none focus:border-ink sm:w-52 sm:flex-initial"
+                />
+                <select
+                  aria-label="並べ替え"
+                  data-control="sort"
+                  value={presetIdOf(sort)}
+                  onChange={(e) => {
+                    const found = SORT_PRESETS.find((p) => p.id === e.target.value);
+                    if (found) setSort(found.sort);
+                  }}
+                  className="h-9 rounded-lg border border-border bg-background px-2.5 text-xs font-bold text-ink outline-none focus:border-ink"
+                >
+                  {SORT_PRESETS.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {(hasExtraFilter || compareNotice) && (
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted">
+                {hasExtraFilter ? (
+                  <p className="flex items-center gap-2">
+                    <span>{shown.length}件を表示中</span>
+                    <button
+                      type="button"
+                      className="font-bold text-ink underline"
+                      onClick={() => {
+                        setStatusFilter("all");
+                        setSourceFilter("all");
+                        setFavoritesOnly(false);
+                        setQuery("");
+                      }}
+                    >
+                      絞り込みを解除
+                    </button>
+                  </p>
+                ) : (
+                  <span />
+                )}
+                {compareNotice && <p className="font-bold text-ended">{compareNotice}</p>}
+              </div>
+            )}
+          </div>
+
+          {shown.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-border bg-card px-5 py-8 text-center text-sm text-muted">
+              条件に合う出品はありません。絞り込みを変えてみてください。
+            </div>
+          ) : (
+            <ul className="min-w-0 space-y-3">
+              {shown.map((item) => {
+                const first = item.photos[0];
+                const thumb = first?.key ? `/api/photo/${item.id}/0` : first?.url;
+                const change = priceChange(item);
+                const compared = compareIds.includes(item.id);
+                return (
+                  <li
+                    key={item.id}
+                    className={`flex min-w-0 gap-3 rounded-2xl border bg-card p-3 shadow-sm transition sm:p-4 ${
+                      compared ? "border-2 border-[#ffdc00] bg-[#FFFDF2]" : "border-border hover:border-ink/20"
+                    } ${item.watchStatus === "passed" ? "opacity-60" : ""}`}
+                  >
+                    <Link href={`/listings/${item.id}`} className="flex min-w-0 flex-1 gap-3">
+                      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-border bg-background sm:h-24 sm:w-24">
+                        {thumb ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={thumb} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <div className="flex h-full items-center justify-center bg-yahoo/40 text-xs font-bold text-ink/50">
+                            おく
+                          </div>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-1 flex flex-wrap items-center gap-1.5">
+                          <AvailabilityBadge value={item.availability} />
+                          <span className="rounded-full border border-[#E5C200] bg-[#FFF8D6] px-2 py-0.5 text-[10px] font-bold text-ink">
+                            {sourceLabel(item.source)}
+                          </span>
+                          {item.watchStatus && item.watchStatus !== "watching" && (
+                            <span className="rounded-full bg-[#FAF7F2] px-2 py-0.5 text-[10px] font-bold text-ink">
+                              {WATCH_STATUS_LABELS[item.watchStatus]}
+                            </span>
+                          )}
+                          {change && (
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                                change.direction === "down"
+                                  ? "bg-emerald-100 text-emerald-800"
+                                  : "bg-amber-100 text-amber-900"
+                              }`}
+                            >
+                              {change.deltaText}
+                            </span>
+                          )}
+                        </div>
+                        <p className="line-clamp-2 break-words text-sm font-bold leading-snug text-ink">{item.title}</p>
+                        {item.priceLabel && item.priceLabel !== "—" ? (
+                          <p className="mt-1.5 text-base font-extrabold tabular-nums text-ink">
+                            {item.priceLabel}
+                            {item.bidCount != null ? (
+                              <span className="ml-2 text-xs font-medium text-muted">入札 {item.bidCount}</span>
+                            ) : null}
+                          </p>
+                        ) : null}
+                        <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-xs text-muted">
+                          {item.endTimeLabel && <span>終了 {item.endTimeLabel}</span>}
+                          {item.condition && <span>状態: {item.condition}</span>}
+                          {item.shipping && <span>{item.shipping}</span>}
+                        </div>
+                      </div>
+                    </Link>
+
+                    <div className="flex shrink-0 flex-col items-end justify-between gap-1">
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => void toggleFavorite(item)}
+                          aria-pressed={Boolean(item.favorite)}
+                          aria-label={item.favorite ? "お気に入りから外す" : "お気に入りに入れる"}
+                          className={`rounded-full px-2 py-1 text-sm ${
+                            item.favorite ? "text-amber-500" : "text-muted/50 hover:text-ink"
+                          }`}
+                        >
+                          {item.favorite ? "♥" : "♡"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => remove(item.id)}
+                          disabled={busyId === item.id}
+                          className="rounded-md px-2 py-1 text-xs text-muted hover:bg-background hover:text-ended"
+                        >
+                          消す
+                        </button>
+                      </div>
+
+                      <label
+                        className={`inline-flex cursor-pointer items-center gap-1 rounded-full border px-2.5 py-1 text-[11px] font-bold select-none ${
+                          compared
+                            ? "border-[#ffdc00] bg-[#ffdc00] text-black"
+                            : "border-border bg-background text-ink"
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={compared}
+                          onChange={() => toggleCompare(item.id)}
+                          className="accent-black"
+                        />
+                        比べる
+                      </label>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </>
+      )}
+
+      {/* 下部固定の比較バー */}
+      {(compareIds.length > 0 || compareMode) && (
+        <div className="fixed inset-x-0 bottom-3 z-30 mx-auto max-w-md px-4">
+          <div className="flex items-center justify-between gap-3 rounded-full border border-black/20 bg-ink px-4 py-2.5 text-xs font-bold text-white shadow-lg">
+            <span>
+              {compareIds.length > 0
+                ? `${compareIds.length}件を選択中（2〜4件）`
+                : "カードの「比べる」にチェック（2〜4件）"}
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setCompareIds([]);
+                  writeCompare([]);
+                  setCompareMode(false);
+                  setCompareNotice(null);
+                }}
+                className="text-white/75 underline hover:text-white"
+              >
+                解除
+              </button>
+              {compareIds.length >= 2 ? (
+                <Link
+                  href="/compare"
+                  className="rounded-full bg-[#ffdc00] px-3.5 py-1 text-xs font-extrabold text-black hover:bg-[#f5c400]"
+                >
+                  並べて見る
+                </Link>
+              ) : (
+                <span className="cursor-not-allowed rounded-full bg-white/20 px-3.5 py-1 text-xs font-bold text-white/60">
+                  並べて見る
+                </span>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -1,8 +1,15 @@
-const SAMPLE_ACTIVE = {
+import { ArrowDown } from "lucide-react";
+
+const YELLOW = "#ffdc00";
+const YELLOW_ACCENT = "#D97706";
+
+export const SAMPLE_ACTIVE = {
   site: "ヤフオク",
+  category: "ミラーレス一眼",
   title: "美品 SONY α7 IV ILCE-7M4 ボディ 元箱・付属品完備",
   priceLabel: "現在価格",
   price: "248,000円",
+  priceNumber: "248,000",
   buyNow: "268,000円",
   bids: "14件",
   condition: "目立った傷や汚れなし",
@@ -12,6 +19,116 @@ const SAMPLE_ACTIVE = {
   photoCount: 10,
   memo: "シャッター回数3,200回・元箱あり。相場比較用に残す",
 };
+
+function Price({ size = 20 }: { size?: number }) {
+  return (
+    <p className="flex items-baseline gap-1 leading-none">
+      <span className="text-[10px] font-bold" style={{ color: "#666666" }}>{SAMPLE_ACTIVE.priceLabel}</span>
+      <span className="font-extrabold tabular-nums text-ink" style={{ fontSize: size }}>{SAMPLE_ACTIVE.priceNumber}</span>
+      <span className="text-[11px] font-bold text-ink">円</span>
+    </p>
+  );
+}
+
+function Badge() {
+  return (
+    <span className="inline-flex shrink-0 items-center rounded-full border border-[#E5C200] bg-[#FFF8D6] px-1.5 py-0.5 text-[9px] leading-none font-bold text-ink">
+      {SAMPLE_ACTIVE.site}
+    </span>
+  );
+}
+
+function SpecChip({ label, value }: { label: string; value: string }) {
+  return (
+    <span className="inline-flex max-w-full items-center gap-1 rounded-md border border-border bg-[#FAF7F2] px-2 py-0.5 text-[11px] leading-4">
+      <span className="shrink-0 font-medium text-muted">{label}</span>
+      <span className="truncate font-bold text-ink">{value}</span>
+    </span>
+  );
+}
+
+export function MiniCard({ ended }: { ended: boolean }) {
+  return (
+    <div className="flex min-w-0 overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
+      <div className={`relative flex w-[38%] shrink-0 items-center justify-center self-stretch bg-gradient-to-br from-[#fff8d6] via-[#ffef99] to-[#ffdc00]/60 p-2 ${ended ? "grayscale opacity-80" : ""}`}>
+        <CameraIllustration className="h-14 w-24 text-ink/85" />
+      </div>
+      <div className="min-w-0 flex-1 border-l-2 p-2.5" style={{ borderColor: YELLOW }}>
+        <p className="text-[10px] font-medium" style={{ color: "#666666" }}>{SAMPLE_ACTIVE.category}</p>
+        <p className="line-clamp-2 break-words text-[13px] leading-snug font-bold text-ink">{SAMPLE_ACTIVE.title}</p>
+        <div className="mt-1"><Price size={19} /></div>
+        <p className="mt-1.5 flex flex-wrap items-center gap-x-1 gap-y-1 text-[11px]">
+          <Badge />
+          <span className={ended ? "font-bold text-ended" : "font-bold text-live"}>{ended ? "終了" : "出品中"}</span>
+          <span className="text-muted"> ・ 検討中</span>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// 出品中と終了を並べて、終わっても残ることを見せる
+export function MockList() {
+  return (
+    <div role="img" aria-label="出品中の商品と、終了しても残る商品（サンプル）" className="mt-4 min-w-0 w-full">
+      <MiniCard ended={false} />
+      <div className="flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-bold" style={{ color: "#78350F" }}>
+        <ArrowDown className="size-3.5" aria-hidden />
+        落札・掲載終了
+      </div>
+      <MiniCard ended />
+      <p
+        className="mt-2 rounded-xl px-3 py-2 text-center text-[12px] leading-5 font-bold"
+        style={{ background: "#FFFFFF", color: "#1C1917", border: "1px solid #E5C200" }}
+      >
+        <span style={{ color: YELLOW_ACCENT }}>写真もメモも残ります</span>
+        <span className="block text-[10px] font-normal" style={{ color: "#6B6560" }}>
+          メモ「{SAMPLE_ACTIVE.memo}」もそのまま
+        </span>
+      </p>
+    </div>
+  );
+}
+
+// アプリの一覧の実カードと同じ構成のサンプル（LandingLineFlow のステップ4などで使用）
+export function AppCard() {
+  return (
+    <div className="min-w-0 overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
+      <div className="relative flex aspect-[16/10] w-full items-center justify-center overflow-hidden bg-gradient-to-br from-[#fff8d6] via-[#ffef99] to-[#ffdc00]/60">
+        <CameraIllustration className="h-20 w-32 text-ink/85" />
+        <span className="absolute right-2.5 bottom-2 rounded-full bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white">
+          写真{SAMPLE_ACTIVE.photoCount}枚
+        </span>
+      </div>
+      <div className="min-w-0 border-t-2 p-3 pb-3.5" style={{ borderColor: YELLOW }}>
+        <p className="text-xs font-medium tracking-wide text-muted">{SAMPLE_ACTIVE.category}</p>
+        <h3 className="line-clamp-2 break-words text-[15px] leading-snug font-bold text-ink">{SAMPLE_ACTIVE.title}</h3>
+        <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
+          <p className="flex items-baseline gap-1 leading-none whitespace-nowrap">
+            <span className="text-[11px] font-bold text-muted">{SAMPLE_ACTIVE.priceLabel}</span>
+            <span className="text-[22px] font-extrabold tabular-nums text-ink">{SAMPLE_ACTIVE.priceNumber}</span>
+            <span className="text-xs font-bold text-ink">円</span>
+          </p>
+          <p className="text-xs whitespace-nowrap text-muted">
+            即決 <span className="font-medium tabular-nums text-ink">{SAMPLE_ACTIVE.buyNow}</span>
+          </p>
+        </div>
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
+          <SpecChip label="入札" value={SAMPLE_ACTIVE.bids} />
+          <SpecChip label="送料" value={SAMPLE_ACTIVE.shipping} />
+          <SpecChip label="状態" value={SAMPLE_ACTIVE.condition} />
+        </div>
+        <p className="mt-2.5 flex flex-wrap items-center gap-x-1 gap-y-1 text-xs">
+          <span className="mr-1 inline-flex shrink-0 items-center rounded-full border border-[#E5C200] bg-[#FFF8D6] px-2 py-0.5 text-[10px] leading-none font-bold text-ink">
+            {SAMPLE_ACTIVE.site}
+          </span>
+          <span className="font-bold text-live">出品中</span>
+          <span className="text-muted"> ・ 検討中 ・ {SAMPLE_ACTIVE.prefecture}</span>
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export function MockHeroCard() {
   return (
@@ -61,62 +178,6 @@ export function MockHeroCard() {
   );
 }
 
-export function MockList() {
-  return (
-    <div className="min-w-0 w-full space-y-2.5" aria-label="保存した一覧の見本">
-      <div className="flex min-w-0 gap-3 overflow-hidden rounded-2xl border border-border bg-card p-3 shadow-xs">
-        <div className="flex h-16 w-20 shrink-0 items-center justify-center rounded-lg bg-[#fff8d6]">
-          <CameraIllustration className="h-10 w-16 text-ink/80" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-1.5">
-            <span className="rounded bg-[#008a00] px-1.5 py-0.5 text-[10px] font-bold text-white">出品中</span>
-            <span className="rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-bold text-ink/80">
-              {SAMPLE_ACTIVE.site}
-            </span>
-            <span className="rounded-full bg-[#fff8d6] px-2 py-0.5 text-[10px] font-bold text-ink">検討中</span>
-          </div>
-          <p className="mt-1 line-clamp-1 break-all text-sm font-bold text-ink">{SAMPLE_ACTIVE.title}</p>
-          <p className="mt-0.5 text-xs text-muted">
-            <span className="font-bold text-ink">{SAMPLE_ACTIVE.price}</span> · 入札 {SAMPLE_ACTIVE.bids} · {SAMPLE_ACTIVE.shipping}
-          </p>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-center gap-2 py-0.5 text-xs font-bold text-ink">
-        <span className="h-px w-8 bg-black/30" />
-        <span>↓ 落札・掲載終了</span>
-        <span className="h-px w-8 bg-black/30" />
-      </div>
-
-      <div className="min-w-0 overflow-hidden rounded-2xl border-2 border-[#ffdc00] bg-card p-3 shadow-xs">
-        <div className="flex min-w-0 gap-3">
-          <div className="flex h-16 w-20 shrink-0 items-center justify-center rounded-lg bg-[#fff8d6]">
-            <CameraIllustration className="h-10 w-16 text-ink/70" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="rounded bg-[#c62828] px-1.5 py-0.5 text-[10px] font-bold text-white">終了</span>
-              <span className="rounded border border-border bg-background px-1.5 py-0.5 text-[10px] font-bold text-ink/80">
-                {SAMPLE_ACTIVE.site}
-              </span>
-              <span className="text-[11px] font-bold text-ink">→ おくならそのまま残る</span>
-            </div>
-            <p className="mt-1 line-clamp-1 break-all text-sm font-bold text-ink">{SAMPLE_ACTIVE.title}</p>
-            <p className="mt-0.5 text-xs text-muted">
-              <span className="font-bold text-ink">{SAMPLE_ACTIVE.price}</span> · 写真{SAMPLE_ACTIVE.photoCount}枚保存済み
-            </p>
-          </div>
-        </div>
-        <div className="mt-2.5 rounded-xl bg-[#fff8d6] px-3 py-2 text-xs leading-5">
-          <p className="font-bold text-ink">写真もメモも残ります</p>
-          <p className="mt-0.5 text-ink/80">メモ：{SAMPLE_ACTIVE.memo}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function Spec({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0 rounded-md bg-background px-2 py-1">
@@ -126,7 +187,7 @@ function Spec({ label, value }: { label: string; value: string }) {
   );
 }
 
-function CameraIllustration({ className }: { className?: string }) {
+export function CameraIllustration({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 120 80" fill="none" className={className} aria-hidden="true">
       <rect x="18" y="22" width="84" height="46" rx="8" fill="#222" />

@@ -4,16 +4,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AccountButton } from "@/components/account-button";
-import { ConnectBadges } from "@/components/connect-badges";
 
 export function SiteHeader() {
   const [signedIn, setSignedIn] = useState(false);
+  const [clerkActive, setClerkActive] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth", { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d: { email?: string | null } | null) => {
+      .then((d: { email?: string | null; clerkActive?: boolean } | null) => {
         setSignedIn(Boolean(d?.email));
+        setClerkActive(Boolean(d?.clerkActive));
       })
       .catch(() => {});
   }, []);
@@ -28,13 +29,18 @@ export function SiteHeader() {
         {signedIn ? (
           <div className="flex min-w-0 items-center gap-2">
             <Link
+              href="/"
+              className="inline-flex h-8 items-center rounded-full border border-black/30 bg-white/85 px-3 text-xs font-bold text-ink hover:bg-white"
+            >
+              保存した出品
+            </Link>
+            <Link
               href="/compare"
-              className="hidden rounded-full border border-black/20 bg-white/85 px-3 py-1 text-xs font-bold text-ink hover:bg-white sm:inline-flex"
+              className="hidden h-8 items-center rounded-full border border-black/20 bg-white/85 px-3 text-xs font-bold text-ink hover:bg-white sm:inline-flex"
             >
               比較
             </Link>
-            <ConnectBadges />
-            <AccountButton />
+            <AccountButton signedIn={signedIn} clerkActive={clerkActive} />
           </div>
         ) : null}
       </div>

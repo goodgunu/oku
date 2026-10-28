@@ -1,9 +1,14 @@
+import { clerkEnabled } from "@/lib/account";
 import { currentUser } from "@/lib/current-user";
 import { clearSessionCookie } from "@/lib/session";
 
 export async function GET(request: Request) {
   const user = await currentUser(request);
-  return Response.json({ email: user?.email || null, folder: user?.folder || null });
+  return Response.json({
+    email: user?.email || null,
+    folder: user?.folder || null,
+    clerkActive: clerkEnabled(),
+  });
 }
 
 export async function DELETE() {

@@ -25,12 +25,36 @@ export const SAMPLE_ACTIVE = {
   memo: "1本裏リムにクラック。補修前提で相場比較用に残す",
 };
 
+export const SAMPLE_MERCARI = {
+  site: "メルカリ",
+  category: "スニーカー",
+  title: "モラルコード【MORAL CODE】 レザースニーカー 27cm ベージュ",
+  titleShort: "モラルコード レザースニーカー 27cm",
+  priceLabel: "価格",
+  price: "6,700円",
+  priceNumber: "6,700",
+  photoCount: 10,
+  photo: "/samples/moral-code.jpg",
+};
+
+type Sample = {
+  site: string;
+  category: string;
+  title: string;
+  titleShort: string;
+  priceLabel: string;
+  price: string;
+  priceNumber: string;
+  photo: string;
+  photoCount: number;
+};
+
 const PHOTO_BG = "#C5C3BE";
 
-export function SamplePhoto({ className = "" }: { className?: string }) {
+export function SamplePhoto({ src = SAMPLE_ACTIVE.photo, className = "" }: { src?: string; className?: string }) {
   return (
     <Image
-      src={SAMPLE_ACTIVE.photo}
+      src={src}
       alt=""
       fill
       sizes="(max-width: 640px) 100vw, 420px"
@@ -39,20 +63,20 @@ export function SamplePhoto({ className = "" }: { className?: string }) {
   );
 }
 
-function Price({ size = 20 }: { size?: number }) {
+function Price({ sample, size = 20 }: { sample: Sample; size?: number }) {
   return (
     <p className="flex items-baseline gap-1 leading-none">
-      <span className="text-[10px] font-bold" style={{ color: "#666666" }}>{SAMPLE_ACTIVE.priceLabel}</span>
-      <span className="font-extrabold tabular-nums text-ink" style={{ fontSize: size }}>{SAMPLE_ACTIVE.priceNumber}</span>
+      <span className="text-[10px] font-bold" style={{ color: "#666666" }}>{sample.priceLabel}</span>
+      <span className="font-extrabold tabular-nums text-ink" style={{ fontSize: size }}>{sample.priceNumber}</span>
       <span className="text-[11px] font-bold text-ink">円</span>
     </p>
   );
 }
 
-function Badge() {
+function Badge({ sample }: { sample: Sample }) {
   return (
     <span className="inline-flex shrink-0 items-center rounded-full border border-[#E5C200] bg-[#FFF8D6] px-1.5 py-0.5 text-[9px] leading-none font-bold text-ink">
-      {SAMPLE_ACTIVE.site}
+      {sample.site}
     </span>
   );
 }
@@ -66,18 +90,18 @@ function SpecChip({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function MiniCard({ ended }: { ended: boolean }) {
+export function MiniCard({ ended, sample = SAMPLE_ACTIVE }: { ended: boolean; sample?: Sample }) {
   return (
     <div className="flex min-w-0 overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
       <div className={`relative w-[38%] shrink-0 self-stretch overflow-hidden ${ended ? "grayscale opacity-80" : ""}`} style={{ background: PHOTO_BG }}>
-        <SamplePhoto />
+        <SamplePhoto src={sample.photo} />
       </div>
       <div className="min-w-0 flex-1 border-l-2 p-2.5" style={{ borderColor: YELLOW }}>
-        <p className="text-[10px] font-medium" style={{ color: "#666666" }}>{SAMPLE_ACTIVE.category}</p>
-        <p className="line-clamp-2 break-words text-[13px] leading-snug font-bold text-ink">{SAMPLE_ACTIVE.title}</p>
-        <div className="mt-1"><Price size={19} /></div>
+        <p className="text-[10px] font-medium" style={{ color: "#666666" }}>{sample.category}</p>
+        <p className="line-clamp-2 break-words text-[13px] leading-snug font-bold text-ink">{sample.title}</p>
+        <div className="mt-1"><Price sample={sample} size={19} /></div>
         <p className="mt-1.5 flex flex-wrap items-center gap-x-1 gap-y-1 text-[11px]">
-          <Badge />
+          <Badge sample={sample} />
           <span className={ended ? "font-bold text-ended" : "font-bold text-live"}>{ended ? "終了" : "出品中"}</span>
           <span className="text-muted"> ・ 検討中</span>
         </p>
@@ -86,16 +110,19 @@ export function MiniCard({ ended }: { ended: boolean }) {
   );
 }
 
-// 出品中と終了を並べて、終わっても残ることを見せる
+// ヤフオクとメルカリの出品中を並べ、終わっても残ることも見せる
 export function MockList() {
   return (
-    <div role="img" aria-label="出品中の商品と、終了しても残る商品（サンプル）" className="mt-4 min-w-0 w-full">
-      <MiniCard ended={false} />
+    <div role="img" aria-label="ヤフオクとメルカリの出品中の商品と、終了しても残る商品（サンプル）" className="mt-4 min-w-0 w-full">
+      <div className="flex flex-col gap-2">
+        <MiniCard ended={false} sample={SAMPLE_ACTIVE} />
+        <MiniCard ended={false} sample={SAMPLE_MERCARI} />
+      </div>
       <div className="flex items-center justify-center gap-1.5 py-1.5 text-[11px] font-bold" style={{ color: "#78350F" }}>
         <ArrowDown className="size-3.5" aria-hidden />
         落札・掲載終了
       </div>
-      <MiniCard ended />
+      <MiniCard ended sample={SAMPLE_ACTIVE} />
       <p
         className="mt-2 rounded-xl px-3 py-2 text-center text-[12px] leading-5 font-bold"
         style={{ background: "#FFFFFF", color: "#1C1917", border: "1px solid #E5C200" }}

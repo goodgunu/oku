@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { BadgeCheck, Camera, History, JapaneseYen, NotebookPen, Store } from "lucide-react";
 import { LandingLineFlow } from "@/components/landing-line-flow";
-import { CameraIllustration, MockHeroCard, MockList } from "@/components/landing-mocks";
+import { MockHeroCard, MockList, SAMPLE_ACTIVE, SamplePhoto } from "@/components/landing-mocks";
 import { LoginOptions } from "@/components/login-options";
 import { Wordmark } from "@/components/wordmark";
 
@@ -178,8 +178,8 @@ export function LandingPage() {
             style={{ color: "#1C1917" }}
             data-promo-card
           >
-            <div className="relative flex aspect-[16/10] w-full items-center justify-center bg-gradient-to-br from-[#fff8d6] via-[#ffef99] to-[#ffdc00]/60">
-              <CameraIllustration className="h-24 w-36 text-ink/85" />
+            <div className="relative aspect-[16/10] w-full overflow-hidden" style={{ background: "#C5C3BE" }}>
+              <SamplePhoto />
               <span
                 className="absolute top-2.5 left-2.5 rounded-full px-2.5 py-0.5 text-[11px] font-extrabold text-black shadow"
                 style={{ background: YELLOW }}
@@ -189,32 +189,32 @@ export function LandingPage() {
             </div>
             <div className="border-t-2 p-4" style={{ borderTopColor: YELLOW }}>
               <div className="flex items-center justify-between">
-                <p className="text-xs font-medium" style={{ color: "#6B6560" }}>ヤフオク · ミラーレス一眼</p>
+                <p className="text-xs font-medium" style={{ color: "#6B6560" }}>ヤフオク · {SAMPLE_ACTIVE.category}</p>
                 <span className="text-[11px]" style={{ color: "#6B6560" }}>今日の確認</span>
               </div>
               <p className="mt-0.5 text-[16px] leading-snug font-bold text-ink">
-                美品 SONY α7 IV ILCE-7M4 ボディ
+                {SAMPLE_ACTIVE.titleShort}
               </p>
               <div className="mt-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                <span className="text-[11px] font-bold" style={{ color: "#6B6560" }}>現在価格</span>
+                <span className="text-[11px] font-bold" style={{ color: "#6B6560" }}>{SAMPLE_ACTIVE.priceLabel}</span>
                 <span
                   className="text-base font-bold tabular-nums line-through decoration-2"
                   style={{ color: "#9A948E" }}
                 >
-                  253,000円
+                  {SAMPLE_ACTIVE.previousPrice}
                 </span>
                 <span className="text-lg font-bold" style={{ color: "#B45309" }} aria-hidden>
                   →
                 </span>
                 <span className="text-[1.75rem] leading-none font-extrabold tabular-nums text-ink">
-                  248,000<span className="text-sm font-bold text-ink">円</span>
+                  {SAMPLE_ACTIVE.priceNumber}<span className="text-sm font-bold text-ink">円</span>
                 </span>
               </div>
               <p
                 className="mt-3 inline-flex items-center rounded-full px-3 py-1 text-sm font-bold"
                 style={{ background: "#E7F6EC", color: "#05813A" }}
               >
-                5,000円値下げ
+                {SAMPLE_ACTIVE.dropLabel}
               </p>
               <p className="mt-2.5 text-[11px] leading-5" style={{ color: "#6B6560" }}>
                 ※ 表示のイメージです。実際の金額ではありません。

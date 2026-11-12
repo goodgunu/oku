@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { Camera, Check, ChevronLeft, ImageIcon, Mic, Plus, Search, Phone as PhoneIcon, Menu, X } from "lucide-react";
-import { AppCard, CameraIllustration } from "@/components/landing-mocks";
+import { AppCard, SAMPLE_ACTIVE, SamplePhoto } from "@/components/landing-mocks";
 
 const YELLOW = "#ffdc00";
 const LINE_GREEN = "#06C755";
@@ -95,8 +95,8 @@ function ShareSheet() {
   return (
     <Frame label="出品サイトの共有ボタンを押すと、友だちの並びに「おく」が出る共有シートの画面（サンプル）" bg="#9AA3AE" height={350}>
       <div className="relative flex h-full flex-col justify-end overflow-hidden">
-        <div className="absolute inset-x-0 top-0 flex h-24 items-center justify-center bg-gradient-to-br from-[#fff8d6] via-[#ffef99] to-[#ffdc00]/60 opacity-75 blur-[1px]">
-          <CameraIllustration className="h-14 w-24 text-ink/70" />
+        <div className="absolute inset-x-0 top-0 h-24 overflow-hidden opacity-75 blur-[1px]" style={{ background: "#C5C3BE" }}>
+          <SamplePhoto />
         </div>
         <div
           className="relative mx-1.5 mb-1.5 rounded-[22px] px-3 pt-3 pb-2"
@@ -106,7 +106,7 @@ function ShareSheet() {
             <span className="grid size-9 place-items-center rounded-[9px] text-[8px] leading-[10px] font-extrabold text-black" style={{ background: "linear-gradient(160deg,#FFDC00,#F5C400)" }}>
               <span className="text-center">出品<br />ページ</span>
             </span>
-            <span className="truncate text-[11px] font-bold" style={{ color: "#111" }}>SONY α7 IV ボディ</span>
+            <span className="truncate text-[11px] font-bold" style={{ color: "#111" }}>{SAMPLE_ACTIVE.titleShort}</span>
           </div>
 
           <div className="grid grid-cols-4 gap-x-1 border-b py-2.5" style={divider}>
@@ -292,21 +292,21 @@ export function LineChatPhone({ maxWidth = 290 }: { maxWidth?: number }) {
           <div className="flex items-end justify-end gap-1">
             <span className="text-right text-[8px] leading-3" style={{ color: "#33425e" }}>既読<br />12:52</span>
             <div className="max-w-[72%] rounded-2xl rounded-tr-sm px-3 py-2 text-[10px] leading-4 break-all" style={{ background: "#6FE87A", color: "#111" }}>
-              https://page.auctions.yahoo.co.jp/...
+              https://auctions.yahoo.co.jp/jp/auction/p1251433346
             </div>
           </div>
           <div className="flex items-start gap-1.5">
             <OkuIcon size={28} badge={false} />
             <div className="flex min-w-0 flex-1 items-end gap-1">
               <div className="min-w-0 flex-1 overflow-hidden rounded-2xl rounded-tl-sm bg-white">
-                <div className="relative flex aspect-[16/10] w-full items-center justify-center bg-gradient-to-br from-[#fff8d6] via-[#ffef99] to-[#ffdc00]/60">
-                  <CameraIllustration className="h-14 w-24 text-ink/85" />
+                <div className="relative aspect-[16/10] w-full overflow-hidden" style={{ background: "#C5C3BE" }}>
+                  <SamplePhoto />
                 </div>
                 <div className="border-t-2 px-2.5 py-2" style={{ borderColor: YELLOW }}>
                   <p className="text-[10px] font-bold" style={{ color: "#B45309" }}>保存しました</p>
-                  <p className="line-clamp-2 text-[11px] leading-tight font-bold text-ink">美品 SONY α7 IV ILCE-7M4 ボディ</p>
+                  <p className="line-clamp-2 text-[11px] leading-tight font-bold text-ink">{SAMPLE_ACTIVE.titleShort}</p>
                   <p className="mt-1 text-[10px] text-ink">
-                    <span className="font-extrabold">248,000円</span> ・ <span className="font-bold text-live">出品中</span>
+                    <span className="font-extrabold">{SAMPLE_ACTIVE.price}</span> ・ <span className="font-bold text-live">出品中</span>
                   </p>
                 </div>
               </div>

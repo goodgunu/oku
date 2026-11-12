@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { ArrowDown } from "lucide-react";
 
 const YELLOW = "#ffdc00";
@@ -5,20 +6,38 @@ const YELLOW_ACCENT = "#D97706";
 
 export const SAMPLE_ACTIVE = {
   site: "ヤフオク",
-  category: "ミラーレス一眼",
-  title: "美品 SONY α7 IV ILCE-7M4 ボディ 元箱・付属品完備",
+  category: "ホイール",
+  title: "ENKEI RPF1RS 18x9.5j+12 114.3-5H シルバー 4本通し ＊1本裏リムにクラックあり　エンケイ　18インチ　5穴",
+  titleShort: "ENKEI RPF1RS 18x9.5J+12",
   priceLabel: "現在価格",
-  price: "248,000円",
-  priceNumber: "248,000",
-  buyNow: "268,000円",
-  bids: "14件",
-  condition: "目立った傷や汚れなし",
-  shipping: "送料無料",
-  prefecture: "東京都",
-  endTime: "10月30日 22:15",
+  price: "81,000円",
+  priceNumber: "81,000",
+  previousPrice: "86,000円",
+  dropLabel: "5,000円値下げ",
+  buyNow: "115,000円",
+  bids: "2件",
+  condition: "やや傷や汚れあり",
+  shipping: "落札者負担",
+  prefecture: "茨城県",
+  endTime: "11月14日 21:48",
   photoCount: 10,
-  memo: "シャッター回数3,200回・元箱あり。相場比較用に残す",
+  photo: "/samples/enkei-rpf1.jpg",
+  memo: "1本裏リムにクラック。補修前提で相場比較用に残す",
 };
+
+const PHOTO_BG = "#C5C3BE";
+
+export function SamplePhoto({ className = "" }: { className?: string }) {
+  return (
+    <Image
+      src={SAMPLE_ACTIVE.photo}
+      alt=""
+      fill
+      sizes="(max-width: 640px) 100vw, 420px"
+      className={`object-contain ${className}`}
+    />
+  );
+}
 
 function Price({ size = 20 }: { size?: number }) {
   return (
@@ -50,8 +69,8 @@ function SpecChip({ label, value }: { label: string; value: string }) {
 export function MiniCard({ ended }: { ended: boolean }) {
   return (
     <div className="flex min-w-0 overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
-      <div className={`relative flex w-[38%] shrink-0 items-center justify-center self-stretch bg-gradient-to-br from-[#fff8d6] via-[#ffef99] to-[#ffdc00]/60 p-2 ${ended ? "grayscale opacity-80" : ""}`}>
-        <CameraIllustration className="h-14 w-24 text-ink/85" />
+      <div className={`relative w-[38%] shrink-0 self-stretch overflow-hidden ${ended ? "grayscale opacity-80" : ""}`} style={{ background: PHOTO_BG }}>
+        <SamplePhoto />
       </div>
       <div className="min-w-0 flex-1 border-l-2 p-2.5" style={{ borderColor: YELLOW }}>
         <p className="text-[10px] font-medium" style={{ color: "#666666" }}>{SAMPLE_ACTIVE.category}</p>
@@ -94,8 +113,8 @@ export function MockList() {
 export function AppCard() {
   return (
     <div className="min-w-0 overflow-hidden rounded-2xl border border-border bg-white shadow-sm">
-      <div className="relative flex aspect-[16/10] w-full items-center justify-center overflow-hidden bg-gradient-to-br from-[#fff8d6] via-[#ffef99] to-[#ffdc00]/60">
-        <CameraIllustration className="h-20 w-32 text-ink/85" />
+      <div className="relative aspect-[16/10] w-full overflow-hidden" style={{ background: PHOTO_BG }}>
+        <SamplePhoto />
         <span className="absolute right-2.5 bottom-2 rounded-full bg-black/75 px-2 py-0.5 text-[10px] font-bold text-white">
           写真{SAMPLE_ACTIVE.photoCount}枚
         </span>
@@ -141,8 +160,8 @@ export function MockHeroCard() {
         <span className="rounded-full bg-black/10 px-2 py-0.5 text-[10px]">写真{SAMPLE_ACTIVE.photoCount}枚</span>
       </div>
 
-      <div className="relative flex aspect-[16/9] items-center justify-center bg-gradient-to-br from-[#fff8d6] via-[#ffef99] to-[#ffdc00]/60">
-        <CameraIllustration className="h-24 w-36 text-ink/80" />
+      <div className="relative aspect-[16/9] overflow-hidden" style={{ background: PHOTO_BG }}>
+        <SamplePhoto />
         <span className="absolute top-2.5 left-2.5 rounded-full bg-[#008a00] px-2.5 py-0.5 text-[10px] font-bold text-white">
           出品中
         </span>
@@ -163,7 +182,7 @@ export function MockHeroCard() {
             <span className="text-xl font-extrabold tabular-nums text-ink">{SAMPLE_ACTIVE.price}</span>
           </div>
           <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800">
-            5,000円値下げ
+            {SAMPLE_ACTIVE.dropLabel}
           </span>
         </div>
 
@@ -184,18 +203,5 @@ function Spec({ label, value }: { label: string; value: string }) {
       <dt className="text-[10px] text-muted">{label}</dt>
       <dd className="truncate font-semibold text-ink">{value}</dd>
     </div>
-  );
-}
-
-export function CameraIllustration({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 120 80" fill="none" className={className} aria-hidden="true">
-      <rect x="18" y="22" width="84" height="46" rx="8" fill="#222" />
-      <path d="M42 22l6-9h24l6 9H42z" fill="#333" />
-      <circle cx="60" cy="45" r="16" fill="#ffdc00" />
-      <circle cx="60" cy="45" r="11" fill="#111" />
-      <circle cx="64" cy="41" r="3" fill="#fff" />
-      <rect x="26" y="28" width="10" height="5" rx="2" fill="#ffdc00" />
-    </svg>
   );
 }

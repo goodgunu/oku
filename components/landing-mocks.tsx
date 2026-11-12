@@ -33,8 +33,12 @@ export const SAMPLE_MERCARI = {
   priceLabel: "価格",
   price: "6,700円",
   priceNumber: "6,700",
-  photoCount: 10,
+  condition: "目立った傷や汚れなし",
+  shipping: "送料込み",
+  prefecture: "東京都",
+  photoCount: 14,
   photo: "/samples/moral-code.jpg",
+  url: "https://jp.mercari.com/item/m58867859200",
 };
 
 type Sample = {

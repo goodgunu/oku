@@ -1,9 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AccountButton } from "@/components/account-button";
+import { Wordmark } from "@/components/wordmark";
+
+const PILL =
+  "h-7 shrink-0 items-center whitespace-nowrap rounded-full border border-black/20 bg-black/[0.05] px-2.5 text-[11px] font-bold leading-none text-ink hover:bg-black/10";
 
 export function SiteHeader() {
   const [signedIn, setSignedIn] = useState(false);
@@ -20,24 +23,18 @@ export function SiteHeader() {
   }, []);
 
   return (
-    <header className="border-b-4 border-yahoo-deep bg-yahoo">
-      <div className="mx-auto flex h-14 max-w-4xl items-center justify-between gap-2 px-4 sm:px-6">
-        <Link href="/" className="flex shrink-0 items-center gap-2 text-lg font-bold tracking-tight text-black">
-          <Image src="/icon.png" alt="" width={28} height={28} className="rounded-md" />
-          おく
+    <header className="border-b border-black/10 bg-yahoo">
+      <div className="mx-auto flex max-w-4xl items-center justify-between gap-2 px-4 py-3 sm:gap-4 sm:px-6">
+        <Link href="/" aria-label="おく ホーム" className="shrink-0">
+          <Wordmark height={32} />
         </Link>
         {signedIn ? (
-          <div className="flex min-w-0 items-center gap-2">
-            <Link
-              href="/"
-              className="inline-flex h-8 items-center rounded-full border border-black/30 bg-white/85 px-3 text-xs font-bold text-ink hover:bg-white"
-            >
+          <div className="flex min-w-0 flex-nowrap items-center gap-1.5 sm:gap-2">
+            <p className="hidden text-xs font-medium text-black/70 sm:block">出品の個人メモ</p>
+            <Link href="/" className={`inline-flex ${PILL}`}>
               保存した出品
             </Link>
-            <Link
-              href="/compare"
-              className="hidden h-8 items-center rounded-full border border-black/20 bg-white/85 px-3 text-xs font-bold text-ink hover:bg-white sm:inline-flex"
-            >
+            <Link href="/compare" className={`hidden sm:inline-flex ${PILL}`}>
               比較
             </Link>
             <AccountButton signedIn={signedIn} clerkActive={clerkActive} />

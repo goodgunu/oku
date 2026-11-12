@@ -7,6 +7,7 @@ import { BadgeCheck, Camera, History, JapaneseYen, NotebookPen, Store } from "lu
 import { LandingLineFlow } from "@/components/landing-line-flow";
 import { CameraIllustration, MockHeroCard, MockList } from "@/components/landing-mocks";
 import { LoginOptions } from "@/components/login-options";
+import { Wordmark } from "@/components/wordmark";
 
 const YELLOW = "#ffdc00";
 const LINE_ACCOUNT_ID = "@916kdopz";
@@ -364,9 +365,8 @@ export function LandingPage() {
       {/* フッター */}
       <footer className="rounded-2xl px-4 py-5 sm:px-7" style={{ background: YELLOW, color: "#111111" }}>
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3">
-          <span className="flex items-center gap-2 text-base font-extrabold text-black">
-            <Image src="/icon.png" alt="" width={22} height={22} className="rounded-md" />
-            おく
+          <span className="shrink-0">
+            <Wordmark height={24} />
           </span>
           <p className="text-xs font-medium text-black/80">気になる出品を、いつでも見返せる場所。</p>
           <span className="flex-1" />

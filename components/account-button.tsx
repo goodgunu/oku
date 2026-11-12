@@ -1,7 +1,7 @@
 "use client";
 
 import { useClerk } from "@clerk/nextjs";
-import { ConnectBadges } from "@/components/connect-badges";
+import { ConnectBadges, HEADER_PILL } from "@/components/connect-badges";
 
 export function AccountButton({ signedIn = false, clerkActive = false }: { signedIn?: boolean; clerkActive?: boolean }) {
   if (!signedIn) return null;
@@ -27,7 +27,7 @@ function ClerkSignOutButton() {
     <button
       type="button"
       onClick={() => void logout()}
-      className="inline-flex h-8 items-center rounded-full border border-black/30 bg-white/80 px-3 text-xs font-bold text-ink hover:bg-white"
+      className={`${HEADER_PILL} border border-black/20 bg-black/[0.05] text-ink hover:bg-black/10`}
     >
       ログアウト
     </button>
@@ -43,7 +43,7 @@ function CookieSignOutButton() {
     <button
       type="button"
       onClick={() => void logout()}
-      className="inline-flex h-8 items-center rounded-full border border-black/30 bg-white/80 px-3 text-xs font-bold text-ink hover:bg-white"
+      className={`${HEADER_PILL} border border-black/20 bg-black/[0.05] text-ink hover:bg-black/10`}
     >
       ログアウト
     </button>

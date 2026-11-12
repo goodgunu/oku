@@ -46,42 +46,6 @@ export function LandingPage() {
 
   return (
     <div className="min-w-0 space-y-6" style={{ color: "#1C1917" }}>
-      {/* トップアクションバー（使い方 / LINEで連携 / はじめる） */}
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <a
-          href="#line-flow"
-          className="rounded-full border border-border bg-white px-3.5 py-1.5 text-xs font-bold text-ink hover:bg-[#FFF8D6]"
-        >
-          使い方（LINE）
-        </a>
-        <a
-          href="/api/auth/line-login?next=%2F"
-          className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-bold text-white shadow-xs"
-          style={{ background: "#06C755" }}
-          onClick={() => {
-            const pending = url.trim();
-            if (pending) {
-              try {
-                sessionStorage.setItem("oku-pending-url", pending);
-              } catch {
-                /* ignore */
-              }
-            }
-          }}
-        >
-          <Image src="/icon-line.png" alt="" width={14} height={14} />
-          LINEで連携
-        </a>
-        <button
-          type="button"
-          className="shrink-0 whitespace-nowrap rounded-full border border-black/15 px-4 py-1.5 text-xs font-extrabold text-black shadow-xs"
-          style={{ background: YELLOW }}
-          onClick={() => openLogin()}
-        >
-          はじめる
-        </button>
-      </div>
-
       {/* ヒーロー（直接URL入力フォーム＋見本カード） */}
       <section
         className="overflow-hidden rounded-3xl border border-[#F3E5AB]"

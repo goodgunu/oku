@@ -57,13 +57,23 @@ const PHOTO_BG = "#C5C3BE";
 
 export function SamplePhoto({ src = SAMPLE_ACTIVE.photo, className = "" }: { src?: string; className?: string }) {
   return (
-    <Image
-      src={src}
-      alt=""
-      fill
-      sizes="(max-width: 640px) 100vw, 420px"
-      className={`object-cover ${className}`}
-    />
+    <>
+      <Image
+        src={src}
+        alt=""
+        fill
+        sizes="(max-width: 640px) 100vw, 420px"
+        aria-hidden
+        className="pointer-events-none scale-125 object-cover blur-2xl"
+      />
+      <Image
+        src={src}
+        alt=""
+        fill
+        sizes="(max-width: 640px) 100vw, 420px"
+        className={`object-contain ${className}`}
+      />
+    </>
   );
 }
 

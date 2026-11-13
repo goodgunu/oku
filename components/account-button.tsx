@@ -27,7 +27,7 @@ function ClerkSignOutButton() {
     <button
       type="button"
       onClick={() => void logout()}
-      className={`${HEADER_PILL} border border-black/20 bg-black/[0.05] text-ink hover:bg-black/10`}
+      className={`${HEADER_PILL} border border-black/15 bg-white text-black shadow-xs hover:bg-white/90`}
     >
       ログアウト
     </button>
@@ -43,7 +43,7 @@ function CookieSignOutButton() {
     <button
       type="button"
       onClick={() => void logout()}
-      className={`${HEADER_PILL} border border-black/20 bg-black/[0.05] text-ink hover:bg-black/10`}
+      className={`${HEADER_PILL} border border-black/15 bg-white text-black shadow-xs hover:bg-white/90`}
     >
       ログアウト
     </button>

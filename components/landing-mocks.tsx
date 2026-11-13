@@ -62,7 +62,7 @@ export function SamplePhoto({ src = SAMPLE_ACTIVE.photo, className = "" }: { src
       alt=""
       fill
       sizes="(max-width: 640px) 100vw, 420px"
-      className={`object-contain ${className}`}
+      className={`object-cover ${className}`}
     />
   );
 }

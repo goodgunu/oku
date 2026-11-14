@@ -45,7 +45,7 @@ export function LandingPage() {
   }
 
   return (
-    <div className="min-w-0 space-y-6" style={{ color: "#1C1917" }}>
+    <div className="min-w-0 space-y-6" style={{ color: "#1C1917" }} data-wide-page>
       {/* ヒーロー（直接URL入力フォーム＋見本カード） */}
       <section
         className="overflow-hidden rounded-3xl border border-[#F3E5AB]"

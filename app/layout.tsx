@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <>
       <AuthNotice />
       <SiteHeader />
-      <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-4xl flex-col px-4 py-6 sm:px-6 sm:py-8">
+      <div className="site-shell mx-auto flex min-h-[calc(100vh-4rem)] max-w-4xl flex-col px-4 py-6 sm:px-6 sm:py-8">
         <main className="min-w-0 w-full flex-1">{children}</main>
       </div>
     </>

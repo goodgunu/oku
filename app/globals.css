@@ -34,3 +34,11 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
 }
+
+/*
+ * トップ（未ログインのランディング）だけは、のこすと同じ広いレイアウトにする。
+ * ふだんの一覧・詳細は読みやすい max-w-4xl のまま。
+ */
+body:has([data-wide-page]) .site-shell {
+  max-width: 72rem;
+}

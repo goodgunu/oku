@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const id = await identity();
-  if (id.state !== "ok") return <LoginGate state={id.state} withLineCard />;
+  if (id.state !== "ok") return <LoginGate state={id.state} withLineCard landing />;
   const user = id.user;
   const listings = await listRecords(user.folder);
 

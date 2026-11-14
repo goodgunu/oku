@@ -1,6 +1,7 @@
 import { GoogleSignIn } from "@/components/google-sign-in";
 import { LandingPage } from "@/components/landing-page";
 import { LineAddCard } from "@/components/line-add-card";
+import { LoginRequired } from "@/components/login-required";
 import { NEEDS_GOOGLE_MESSAGE } from "@/lib/identity";
 import type { Identity } from "@/lib/current-user";
 
@@ -8,13 +9,16 @@ export function LoginGate({
   state,
   linking = false,
   withLineCard = false,
+  landing = false,
 }: {
   state: Exclude<Identity["state"], "ok">;
   linking?: boolean;
   withLineCard?: boolean;
+  /** トップ（/）だけ true。ほかのページは「ログインすると見られます」を出す */
+  landing?: boolean;
 }) {
   if (!linking && state === "anonymous") {
-    return <LandingPage />;
+    return landing ? <LandingPage /> : <LoginRequired />;
   }
   return (
     <div className="space-y-6">

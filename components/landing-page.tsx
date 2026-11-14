@@ -171,7 +171,7 @@ export function LandingPage() {
                 値下げや終了を、LINEでお知らせ
               </p>
               <p className="mt-2 text-sm leading-6" style={{ color: "#57534E" }}>
-                LINEで連携すると、値下げや落札・掲載終了が見つかった日に、LINEへお知らせが届きます（1日1通にまとめます）。
+                LINEで連携すると、お気に入りに登録した出品の値下げや落札・掲載終了が見つかった日に、LINEへお知らせが届きます（1日1通にまとめます）。
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <a

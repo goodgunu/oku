@@ -11,7 +11,7 @@ export async function LineAddCard() {
             公式LINE「おく」{id ? `（${id}）` : ""}
           </p>
           <p className="text-xs leading-relaxed text-muted">
-            友だち追加して連携すると、出品ページのURLをトークで送るだけで保存でき、値下げや終了のお知らせも受け取れます。
+            友だち追加して連携すると、出品ページのURLをトークで送るだけで保存でき、お気に入りに登録した出品の値下げや終了のお知らせも受け取れます。
           </p>
         </div>
         <a

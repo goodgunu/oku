@@ -1,4 +1,4 @@
-import { detectEvents, queueEventsForPath, sendDigests, type DigestReport } from "@/lib/notify";
+import { eventsToQueue, queueEventsForPath, sendDigests, type DigestReport } from "@/lib/notify";
 import { checkDue, priceHistoryAfter } from "@/lib/price-history";
 import { fetchListing } from "@/lib/sources";
 import { listAllStoredRecords, writeStoredRecord } from "@/lib/store";
@@ -78,7 +78,7 @@ export async function runDailyCheck(limit = DEFAULT_LIMIT, opts?: { baseUrl?: st
     } else {
       if ((after.priceHistory?.length ?? 0) > (before.priceHistory?.length ?? 0)) priceChanged += 1;
       if (before.availability !== "ended" && after.availability === "ended") endedDetected += 1;
-      const events = detectEvents(before, after, nowIso);
+      const events = eventsToQueue(before, after, nowIso);
       if (events.length > 0) await queueEventsForPath(item.pathKey, events);
     }
     await writeStoredRecord(item.pathKey, after);

@@ -33,6 +33,7 @@ export const SAMPLE_MERCARI = {
   title: "モラルコード【MORAL CODE】 レザースニーカー 27cm ベージュ",
   titleShort: "モラルコード レザースニーカー 27cm",
   titleCard: "モラルコード レザースニーカー 27cm ベージュ",
+  titleMini: "モラルコード スニーカー",
   priceLabel: "価格",
   price: "6,700円",
   priceNumber: "6,700",
@@ -50,6 +51,8 @@ type Sample = {
   title: string;
   titleShort: string;
   titleCard: string;
+  /** 狭いカード（使い方の4コマ目など）用。無ければ titleShort */
+  titleMini?: string;
   priceLabel: string;
   price: string;
   priceNumber: string;
@@ -83,10 +86,12 @@ export function SamplePhoto({ src = SAMPLE_ACTIVE.photo, className = "" }: { src
 
 function Price({ sample, size = 20 }: { sample: Sample; size?: number }) {
   return (
-    <p className="flex items-baseline gap-1 leading-none">
-      <span className="text-[10px] font-bold" style={{ color: "#666666" }}>{sample.priceLabel}</span>
-      <span className="font-extrabold tabular-nums text-ink" style={{ fontSize: size }}>{sample.priceNumber}</span>
-      <span className="text-[11px] font-bold text-ink">円</span>
+    <p className="flex flex-wrap items-baseline gap-x-1 gap-y-0.5 leading-none">
+      <span className="text-[10px] font-bold whitespace-nowrap" style={{ color: "#666666" }}>{sample.priceLabel}</span>
+      <span className="whitespace-nowrap">
+        <span className="font-extrabold tabular-nums text-ink" style={{ fontSize: size }}>{sample.priceNumber}</span>
+        <span className="ml-0.5 text-[11px] font-bold text-ink">円</span>
+      </span>
     </p>
   );
 }
@@ -116,7 +121,7 @@ export function MiniCard({ ended, sample = SAMPLE_ACTIVE }: { ended: boolean; sa
       </div>
       <div className="min-w-0 flex-1 border-l-2 p-2.5" style={{ borderColor: YELLOW }}>
         <p className="text-[10px] font-medium" style={{ color: "#666666" }}>{sample.category}</p>
-        <p className="line-clamp-2 break-words text-[13px] leading-snug font-bold text-ink">{sample.titleShort}</p>
+        <p className="line-clamp-2 break-words text-[13px] leading-snug font-bold text-ink">{sample.titleMini ?? sample.titleShort}</p>
         <div className="mt-1"><Price sample={sample} size={19} /></div>
         <p className="mt-1.5 flex flex-wrap items-center gap-x-1 gap-y-1 text-[11px]">
           <Badge sample={sample} />

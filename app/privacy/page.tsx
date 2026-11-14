@@ -41,6 +41,7 @@ export default function PrivacyPage() {
           <li>Vercel: 本サービスの動作（ホスティング）と、毎朝の自動確認。</li>
           <li>Clerk: Google・X・メールでのログインの管理。</li>
           <li>LINE: LINE ログインと、公式アカウントでのやり取り・お知らせ。</li>
+          <li>Yahoo! JAPAN: Yahoo! JAPAN ID でのログイン（提供を開始した場合）。</li>
         </ul>
         <p>これらの事業者は、日本国外にサーバーを置いている場合があります。各事業者のプライバシーポリシーも、あわせてご確認ください。</p>
       </Section>

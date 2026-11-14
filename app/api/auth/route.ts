@@ -1,6 +1,7 @@
 import { clerkEnabled } from "@/lib/account";
 import { currentUser } from "@/lib/current-user";
 import { clearSessionCookie } from "@/lib/session";
+import { isRegisteredHost, yahooLoginConfig } from "@/lib/yahoo-oauth";
 
 export async function GET(request: Request) {
   const user = await currentUser(request);
@@ -8,6 +9,8 @@ export async function GET(request: Request) {
     email: user?.email || null,
     folder: user?.folder || null,
     clerkActive: clerkEnabled(),
+    // Yahoo! JAPAN ID ログインは、Client ID / Secret を設定した本番URLでだけ出す
+    yahooLogin: Boolean(yahooLoginConfig()) && isRegisteredHost(request),
   });
 }
 

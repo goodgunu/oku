@@ -32,7 +32,15 @@ export function LoginOptions({ redirectUrl = "/", onBeforeStart }: { redirectUrl
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [newUser, setNewUser] = useState(false);
+  const [yahooLogin, setYahooLogin] = useState(false);
   const ready = fetchStatus !== "fetching" && !busy;
+
+  useEffect(() => {
+    fetch("/api/auth", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { yahooLogin?: boolean } | null) => setYahooLogin(Boolean(d?.yahooLogin)))
+      .catch(() => undefined);
+  }, []);
 
   useEffect(() => {
     const reset = () => setBusy("");
@@ -156,7 +164,7 @@ export function LoginOptions({ redirectUrl = "/", onBeforeStart }: { redirectUrl
     <div className="w-full">
       {mode === "choose" && (
         <div className="space-y-2.5">
-          {/* 並び順: LINE、X、Google、メール */}
+          {/* 並び順: LINE、X、Google、Yahoo!（設定済みのときだけ）、メール */}
           <a
             href={`/api/auth/line-login?next=${next}`}
             onClick={() => onBeforeStart?.()}
@@ -168,6 +176,17 @@ export function LoginOptions({ redirectUrl = "/", onBeforeStart }: { redirectUrl
           </a>
           {providerButton("x")}
           {providerButton("google")}
+          {yahooLogin && (
+            <a
+              href={`/api/auth/yahoo-login?next=${next}`}
+              onClick={() => onBeforeStart?.()}
+              className="flex h-12 w-full items-center justify-center gap-3 rounded-full text-base font-bold text-white shadow-sm"
+              style={{ background: "#FF0033" }}
+            >
+              <Image src="/icon-yahoo.png" alt="" width={29} height={15} />
+              Yahoo!で続ける
+            </a>
+          )}
           <button
             type="button"
             className="flex h-12 w-full items-center justify-center gap-3 rounded-full text-base font-bold text-black shadow-sm disabled:opacity-60"

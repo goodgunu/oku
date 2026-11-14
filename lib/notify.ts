@@ -76,6 +76,21 @@ export function detectEvents(before: ArchiveRecord, after: ArchiveRecord, nowIso
   return [];
 }
 
+/** LINE通知の対象は、お気に入りに登録した出品だけ。価格の記録や掲載状況の更新とは別。 */
+export function isFavoriteListing(record: Pick<ArchiveRecord, "favorite"> | null | undefined): boolean {
+  return record?.favorite === true;
+}
+
+/** 値下げ・終了を検知したあと、お気に入りの出品だけ待ち行列に乗せる。 */
+export function eventsToQueue(
+  before: ArchiveRecord,
+  after: ArchiveRecord,
+  nowIso = new Date().toISOString(),
+): NotifyEvent[] {
+  if (!isFavoriteListing(after) && !isFavoriteListing(before)) return [];
+  return detectEvents(before, after, nowIso);
+}
+
 export function mergeEvents(existing: NotifyEvent[], incoming: NotifyEvent[]): NotifyEvent[] {
   const byKey = new Map<string, NotifyEvent>();
   for (const ev of existing) byKey.set(`${ev.kind}:${ev.listingId}`, ev);

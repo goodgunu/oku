@@ -9,7 +9,7 @@ import "./globals.css";
 const SITE_URL = "https://oku-bice.vercel.app";
 const SITE_TITLE = "おく｜気になった出品を、消える前に残す";
 const SITE_DESCRIPTION =
-  "ヤフオク・メルカリ・PayPayフリマ・ジモティーの出品を、落札や掲載終了で消える前に自分のアカウントへ残すメモ。URLを貼るか、LINEの「おく」に送るだけ。値下げや終了はLINEでお知らせします。";
+  "ヤフオク・メルカリ・PayPayフリマ・ジモティーの出品を、落札や掲載終了で消える前に自分のアカウントへ残すメモ。URLを貼るか、LINEの「おく」に送るだけ。お気に入りに登録した出品の値下げや終了はLINEでお知らせします。";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

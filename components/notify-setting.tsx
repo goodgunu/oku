@@ -74,7 +74,7 @@ export function NotifySettingCard() {
           <h3 className="text-sm font-bold text-ink">値下げ・終了をLINEでお知らせ</h3>
         </div>
         <p className="mt-1 text-xs leading-5 text-muted">
-          保存した出品が値下げされたり、出品終了になったとき、夜にまとめて1回だけLINEでお知らせします。
+          お気に入りに登録した出品が値下げされたり、出品終了になったとき、1日1通にまとめてLINEでお知らせします。
         </p>
       </div>
 

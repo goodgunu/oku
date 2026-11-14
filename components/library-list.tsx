@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { classify, countByFilter, type Filter } from "@/lib/classify";
 import { readCompare, writeCompare } from "@/lib/compare";
 import { SOURCE_TABS, WATCH_STATUS_LABELS, matchesQuery, sourceCounts, type SourceFilter } from "@/lib/library-filter";
 import { DEFAULT_SORT, SORT_PRESETS, presetIdOf, sortListings, type SortState } from "@/lib/library-sort";
+import { LibraryPager } from "@/components/library-pager";
+import { DEFAULT_PAGE_SIZE, PAGE_SIZES, PAGE_SIZE_KEY, paginate, parsePage, parsePageSize, type PageSize } from "@/lib/library-page";
 import { priceChange } from "@/lib/price-history";
 import { sourceLabel } from "@/lib/source-labels";
 import type { ArchiveRecord } from "@/lib/types";
@@ -30,6 +32,19 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
   const [compareMode, setCompareMode] = useState(false);
   const [compareNotice, setCompareNotice] = useState<string | null>(null);
   const [now] = useState(() => Date.now());
+  // ページ分け: 表示件数はこのブラウザに覚える。今のページは ?page= に残す
+  const [pageSize, setPageSize] = useState<PageSize>(() => {
+    if (typeof window === "undefined") return DEFAULT_PAGE_SIZE;
+    try {
+      return parsePageSize(localStorage.getItem(PAGE_SIZE_KEY));
+    } catch {
+      return DEFAULT_PAGE_SIZE;
+    }
+  });
+  const [page, setPage] = useState(() =>
+    typeof window === "undefined" ? 1 : parsePage(new URLSearchParams(window.location.search).get("page")),
+  );
+  const listTopRef = useRef<HTMLDivElement>(null);
 
   // 折りたたみ式「＋ URLから直接追加」フォーム
   const [showAdd, setShowAdd] = useState<boolean>(() => initialListings.length === 0);
@@ -76,6 +91,40 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
   });
 
   const shown = sortListings(filtered, sort);
+  // 並べ替え・絞り込み・表示件数が変わったら1ページ目に戻す
+  const pageResetKey = JSON.stringify([query, sourceFilter, statusFilter, favoritesOnly, sort, pageSize]);
+  const [lastResetKey, setLastResetKey] = useState(pageResetKey);
+  if (pageResetKey !== lastResetKey) {
+    setLastResetKey(pageResetKey);
+    setPage(1);
+  }
+  const paged = useMemo(() => paginate(shown, page, pageSize), [shown, page, pageSize]);
+
+  // 今のページを URL の ?page= に残す（1ページ目は付けない）。一覧があるときだけ
+  useEffect(() => {
+    if (listings.length === 0) return;
+    const url = new URL(window.location.href);
+    const current = url.searchParams.get("page");
+    const want = paged.page > 1 ? String(paged.page) : null;
+    if (current === want) return;
+    if (want) url.searchParams.set("page", want);
+    else url.searchParams.delete("page");
+    window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+  }, [listings.length, paged.page]);
+
+  function goToPage(next: number) {
+    setPage(next);
+    listTopRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function changePageSize(next: PageSize) {
+    setPageSize(next);
+    try {
+      localStorage.setItem(PAGE_SIZE_KEY, String(next));
+    } catch {
+      // 保存できないブラウザでは、この画面の間だけ使う
+    }
+  }
 
   async function onAddSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -375,8 +424,30 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
               条件に合う出品はありません。絞り込みを変えてみてください。
             </div>
           ) : (
+            <div ref={listTopRef} className="min-w-0 scroll-mt-3" data-library="paged">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2" data-library="page-info">
+              <p className="text-sm" aria-live="polite">
+                <span className="font-bold tabular-nums">{paged.total}</span>件中{" "}
+                <span className="font-bold tabular-nums">{paged.from}〜{paged.to}</span>件を表示
+              </p>
+              <label className="flex items-center gap-2 text-sm">
+                <span className="text-muted text-xs font-bold">表示件数</span>
+                <select
+                  data-control="page-size"
+                  value={pageSize}
+                  onChange={(event) => changePageSize(parsePageSize(event.target.value))}
+                  className="h-11 rounded-lg border border-border bg-card px-3 text-sm font-bold"
+                >
+                  {PAGE_SIZES.map((size) => (
+                    <option key={size} value={size}>
+                      {size}件
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
             <ul className="min-w-0 space-y-3">
-              {shown.map((item) => {
+              {paged.items.map((item) => {
                 const first = item.photos[0];
                 const thumb = first?.key ? `/api/photo/${item.id}/0` : first?.url;
                 const change = priceChange(item);
@@ -482,6 +553,8 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
                 );
               })}
             </ul>
+            <LibraryPager page={paged.page} totalPages={paged.totalPages} onChange={goToPage} />
+            </div>
           )}
         </>
       )}

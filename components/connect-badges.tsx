@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 export const HEADER_PILL =
-  "inline-flex h-7 shrink-0 items-center whitespace-nowrap rounded-full px-2.5 text-[11px] font-bold leading-none";
+  "inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded-full px-3.5 text-xs font-bold leading-none";
 
 type LinksResponse = {
   line?: boolean;
@@ -41,7 +41,7 @@ export function ConnectBadges() {
     <div className="flex items-center gap-1.5">
       {lineLinked === true && (
         <span
-          className="inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-[11px] font-bold text-white"
+          className="inline-flex h-11 items-center gap-1 rounded-full px-3 text-xs font-bold text-white"
           style={{ background: "#06C755" }}
           title="LINEと連携済みです"
         >
@@ -54,7 +54,7 @@ export function ConnectBadges() {
         <button
           type="button"
           onClick={linkLine}
-          className="inline-flex h-7 items-center gap-1 rounded-full px-2.5 text-[11px] font-bold text-white shadow-xs hover:opacity-95"
+          className="inline-flex h-11 items-center gap-1 rounded-full px-3 text-xs font-bold text-white shadow-xs hover:opacity-95"
           style={{ background: "#06C755" }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}

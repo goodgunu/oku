@@ -1,27 +1,66 @@
-import { LegalPage } from "@/components/legal-page";
+import type { Metadata } from "next";
+import { LegalPage, Section } from "@/components/legal-page";
 import { CONTACT_EMAIL, OPERATOR_NAME } from "@/lib/legal";
+
+export const metadata: Metadata = { title: "プライバシーポリシー" };
 
 export default function PrivacyPage() {
   return (
     <LegalPage title="プライバシーポリシー">
-      <section className="space-y-2">
-        <h2 className="font-bold">1. 取得する情報</h2>
-        <p className="text-muted">
-          {OPERATOR_NAME}では、ログインやアカウント連携のためにメールアドレスまたは各サービスの識別子（LINE・X・Google等）、および利用者自身が保存した出品ページのURL・タイトル・価格・写真・メモを保存します。
+      <p>
+        「おく」（以下「本サービス」）は、ヤフオク・メルカリ・PayPayフリマ・ジモティーの出品ページを、自分のアカウントに残すためのサービスです。{OPERATOR_NAME}（以下「運営者」）は、本サービスで扱う情報を、次のとおり大切に取り扱います。
+      </p>
+      <Section title="1. 取得する情報">
+        <ul className="list-disc space-y-1 pl-5">
+          <li>ログインに使う情報: LINE・Google・X の各アカウントの識別子（ID）、メールアドレス（メールでログインした場合、または取得できた場合）。</li>
+          <li>LINE の公式アカウント「おく」をご利用の場合: LINE のユーザー識別子と、送っていただいたメッセージ（出品ページのURL）。</li>
+          <li>ご自身で保存した情報: 出品の情報（タイトル、価格、即決価格、送料、状態、カテゴリ、終了日時、出品者名、発送元の地域、説明文など）、写真、価格の記録、メモ、検討状況。</li>
+          <li>設定: LINE でのお知らせの設定。</li>
+          <li>サービスの動作に必要な情報: ログイン状態を保つための Cookie（有効期間は最長1年）。</li>
+        </ul>
+        <p>各サービスから取得する項目は、ログインに必要な最小限です。パスワードは取得しません。</p>
+      </Section>
+      <Section title="2. 利用目的">
+        <ul className="list-disc space-y-1 pl-5">
+          <li>本サービスの提供（出品の保存と表示、毎朝の価格・掲載状況の確認、LINE への返信とお知らせ）。</li>
+          <li>ご本人であることの確認（ログイン）。</li>
+          <li>不具合の調査と、サービスの改善。</li>
+        </ul>
+      </Section>
+      <Section title="3. 第三者への提供">
+        <p>法令に基づく場合を除き、取得した情報を本人の同意なく第三者に提供することはありません。広告のために情報を使うこともありません。</p>
+        <p>
+          ただし、ご自身が共有を操作した出品については、タイトル、価格、状態、送料、地域、説明文、写真、元の出品ページへのリンクを載せた共有ページができ、そのURLを知っている人が見られます。メモと出品者名は載せません。共有ページを消したいときは、下記へご連絡ください。
         </p>
-      </section>
-      <section className="space-y-2">
-        <h2 className="font-bold">2. 利用目的</h2>
-        <p className="text-muted">
-          保存した出品一覧の表示、価格変動・終了の確認、LINEでのお知らせ通知、およびサービス改善のためにのみ利用し、第三者へ販売・提供することはありません。
+      </Section>
+      <Section title="4. 保存先と委託先">
+        <p>本サービスは、次の事業者のサービスを利用して情報を取り扱います。これらは、サービスの運用を委託する先であり、情報の提供とは異なります。</p>
+        <ul className="list-disc space-y-1 pl-5">
+          <li>Cloudflare（R2）: 保存した出品の情報と写真の保管。</li>
+          <li>Cloudflare（Browser Rendering）: メルカリの出品ページの読み取り（出品ページのURLだけを渡します）。</li>
+          <li>Vercel: 本サービスの動作（ホスティング）と、毎朝の自動確認。</li>
+          <li>Clerk: Google・X・メールでのログインの管理。</li>
+          <li>LINE: LINE ログインと、公式アカウントでのやり取り・お知らせ。</li>
+        </ul>
+        <p>これらの事業者は、日本国外にサーバーを置いている場合があります。各事業者のプライバシーポリシーも、あわせてご確認ください。</p>
+      </Section>
+      <Section title="5. 情報の管理と保管期間">
+        <p>情報は、不正なアクセスや漏えいを防ぐよう、適切に管理します。</p>
+        <p>
+          保存した出品は、ご自身で削除するか、アカウントの削除を依頼されるまで保管します。出品の詳細画面から削除すると、その出品の情報と写真はすぐに消えます。LINE との連携のための一時的なコードは、最長7日で使えなくなります。
         </p>
-      </section>
-      <section className="space-y-2">
-        <h2 className="font-bold">3. お問い合わせ</h2>
-        <p className="text-muted">
-          本ポリシーに関するお問い合わせは、{CONTACT_EMAIL} までご連絡ください。
+      </Section>
+      <Section title="6. 開示・訂正・削除のご依頼">
+        <p>アカウントごとの削除や、ご自身の情報の開示・訂正を希望される場合は、下記へご連絡ください。ご本人であることを確認したうえで、合理的な期間内に対応します。</p>
+        <p>
+          運営者: {OPERATOR_NAME}
+          <br />
+          メール: {CONTACT_EMAIL}
         </p>
-      </section>
+      </Section>
+      <Section title="7. 改定">
+        <p>必要に応じて、この内容を改定します。大きな変更があるときは、本サービス上でお知らせします。</p>
+      </Section>
     </LegalPage>
   );
 }

@@ -20,3 +20,12 @@ export function LegalPage({ title, children }: { title: string; children: React.
     </div>
   );
 }
+
+export function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="space-y-2">
+      <h2 className="font-bold">{title}</h2>
+      <div className="space-y-2 text-ink/80">{children}</div>
+    </section>
+  );
+}

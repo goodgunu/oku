@@ -6,12 +6,31 @@ import { SiteHeader } from "@/components/site-header";
 import { clerkEnabled } from "@/lib/account";
 import "./globals.css";
 
+const SITE_URL = "https://oku-bice.vercel.app";
+const SITE_TITLE = "おく｜気になった出品を、消える前に残す";
+const SITE_DESCRIPTION =
+  "ヤフオク・メルカリ・PayPayフリマ・ジモティーの出品を、落札や掲載終了で消える前に自分のアカウントへ残すメモ。URLを貼るか、LINEの「おく」に送るだけ。値下げや終了はLINEでお知らせします。";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "おく",
+    default: SITE_TITLE,
     template: "%s · おく",
   },
-  description: "ヤフオク・PayPayフリマ・ジモティー・メルカリの出品を、消える前に自分のメモとして残すアプリ。",
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    locale: "ja_JP",
+    siteName: "おく",
+    url: "/",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
   icons: {
     icon: [{ url: "/favicon.png", type: "image/png" }, { url: "/icon.png", type: "image/png" }],
     apple: "/icon.png",

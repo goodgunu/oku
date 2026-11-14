@@ -22,9 +22,12 @@ const kept = [
   ["自分のメモ", "状態の確認結果や相場比較メモ", NotebookPen],
 ] as const;
 
+const SITES = ["ヤフオク", "メルカリ", "PayPayフリマ", "ジモティー"] as const;
+
 export function LandingPage() {
   const [url, setUrl] = useState("");
   const [showLogin, setShowLogin] = useState(false);
+  const [urlError, setUrlError] = useState("");
 
   useEffect(() => {
     const onOpen = () => setShowLogin(true);
@@ -70,24 +73,52 @@ export function LandingPage() {
 
             <form
               className="mt-5 rounded-2xl border border-[#E5C200] bg-white p-4 shadow-sm"
+              noValidate
               onSubmit={(event) => {
                 event.preventDefault();
-                openLogin(url);
+                const value = url.trim();
+                if (!value) {
+                  setUrlError("URLを貼ってください");
+                  document.getElementById("landing-url")?.focus();
+                  return;
+                }
+                if (!/^https?:\/\//i.test(value)) {
+                  setUrlError("「https://」から始まるURLを貼ってください");
+                  document.getElementById("landing-url")?.focus();
+                  return;
+                }
+                setUrlError("");
+                openLogin(value);
               }}
             >
-              <label htmlFor="landing-url" className="block text-xs font-bold text-muted">
+              <p className="text-xs leading-5 font-bold text-ink" data-landing="sites">
+                対応サイト：{SITES.join("・")}
+              </p>
+              <label htmlFor="landing-url" className="mt-2 block text-xs font-bold text-muted">
                 出品ページのURL
               </label>
               <input
                 id="landing-url"
                 value={url}
-                onChange={(event) => setUrl(event.target.value)}
-                placeholder="ヤフオク・メルカリ・PayPayフリマ・ジモティーのURL"
-                className="mt-2 w-full min-w-0 rounded-lg border border-border bg-white px-3 py-3 text-sm text-ink outline-none focus:border-ink focus:ring-2 focus:ring-[#ffdc00]"
+                onChange={(event) => {
+                  setUrl(event.target.value);
+                  if (urlError) setUrlError("");
+                }}
+                placeholder="https://… をここに貼る"
+                className={`mt-1.5 w-full min-w-0 rounded-lg border bg-white px-3 py-3 text-base text-ink outline-none focus:ring-2 focus:ring-[#ffdc00] sm:text-sm ${
+                  urlError ? "border-red-600 focus:border-red-600" : "border-border focus:border-ink"
+                }`}
                 inputMode="url"
                 autoCapitalize="off"
                 autoCorrect="off"
+                aria-invalid={urlError ? true : undefined}
+                aria-describedby={urlError ? "landing-url-error" : undefined}
               />
+              {urlError ? (
+                <p id="landing-url-error" role="alert" className="mt-1.5 text-xs font-bold text-red-700">
+                  {urlError}
+                </p>
+              ) : null}
               <button
                 type="submit"
                 className="mt-2.5 w-full rounded-lg py-3 text-[15px] font-extrabold text-black shadow-xs transition hover:brightness-95"
@@ -238,7 +269,7 @@ export function LandingPage() {
             <p className="text-xs font-bold tracking-[0.14em]" style={{ color: "#B45309" }}>
               ログイン・新規登録
             </p>
-            <h2 className="mt-1 text-lg font-bold text-ink">はじめる</h2>
+            <h2 className="mt-1 text-lg font-bold text-ink">おくをはじめる</h2>
             <p className="mt-1 mb-4 text-xs leading-5 text-muted">
               はじめての方は、そのまま登録されます。登録済みの方はそのままログインできます。
             </p>
@@ -327,19 +358,26 @@ export function LandingPage() {
       </section>
 
       {/* フッター */}
-      <footer className="rounded-2xl px-4 py-5 sm:px-7" style={{ background: YELLOW, color: "#111111" }}>
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3">
-          <span className="shrink-0">
-            <Wordmark height={24} />
-          </span>
-          <p className="text-xs font-medium text-black/80">気になる出品を、いつでも見返せる場所。</p>
-          <span className="flex-1" />
-          <Link href="/privacy" className="text-xs font-bold underline">
-            プライバシーポリシー
-          </Link>
-          <Link href="/terms" className="text-xs font-bold underline">
-            利用規約
-          </Link>
+      <footer className="rounded-2xl px-4 pt-4 pb-3 sm:px-7" style={{ background: YELLOW, color: "#111111" }}>
+        <div className="mx-auto max-w-6xl">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="shrink-0">
+              <Wordmark height={24} />
+            </span>
+            <p className="text-xs font-medium text-black/80">気になる出品を、いつでも見返せる場所。</p>
+            <span className="flex-1" />
+            <nav className="-mx-2 flex flex-wrap" aria-label="規約">
+              <Link href="/privacy" className="inline-flex min-h-11 items-center px-2 text-sm font-bold underline underline-offset-4">
+                プライバシーポリシー
+              </Link>
+              <Link href="/terms" className="inline-flex min-h-11 items-center px-2 text-sm font-bold underline underline-offset-4">
+                利用規約
+              </Link>
+            </nav>
+          </div>
+          <p className="mt-1 text-xs leading-5 text-black/75" data-landing="disclaimer">
+            おくは個人が運営するサービスで、ヤフオク・メルカリ・PayPayフリマ・ジモティーなど各サイトの公式サービスではありません。出品の文章と写真の権利は、出品者と各サイトにあります。
+          </p>
         </div>
       </footer>
     </div>

@@ -9,6 +9,8 @@ export const SAMPLE_ACTIVE = {
   category: "ホイール",
   title: "ENKEI RPF1RS 18x9.5j+12 114.3-5H シルバー 4本通し ＊1本裏リムにクラックあり　エンケイ　18インチ　5穴",
   titleShort: "ENKEI RPF1RS 18x9.5J+12",
+  // カードで2行に収まる長さ（元タイトルは長く、途中の「クラックあり」で切れてしまうため）
+  titleCard: "ENKEI RPF1RS 18x9.5J+12 114.3-5H シルバー 4本通し",
   priceLabel: "現在価格",
   price: "81,000円",
   priceNumber: "81,000",
@@ -30,6 +32,7 @@ export const SAMPLE_MERCARI = {
   category: "スニーカー",
   title: "モラルコード【MORAL CODE】 レザースニーカー 27cm ベージュ",
   titleShort: "モラルコード レザースニーカー 27cm",
+  titleCard: "モラルコード レザースニーカー 27cm ベージュ",
   priceLabel: "価格",
   price: "6,700円",
   priceNumber: "6,700",
@@ -46,6 +49,7 @@ type Sample = {
   category: string;
   title: string;
   titleShort: string;
+  titleCard: string;
   priceLabel: string;
   price: string;
   priceNumber: string;
@@ -112,7 +116,7 @@ export function MiniCard({ ended, sample = SAMPLE_ACTIVE }: { ended: boolean; sa
       </div>
       <div className="min-w-0 flex-1 border-l-2 p-2.5" style={{ borderColor: YELLOW }}>
         <p className="text-[10px] font-medium" style={{ color: "#666666" }}>{sample.category}</p>
-        <p className="line-clamp-2 break-words text-[13px] leading-snug font-bold text-ink">{sample.title}</p>
+        <p className="line-clamp-2 break-words text-[13px] leading-snug font-bold text-ink">{sample.titleShort}</p>
         <div className="mt-1"><Price sample={sample} size={19} /></div>
         <p className="mt-1.5 flex flex-wrap items-center gap-x-1 gap-y-1 text-[11px]">
           <Badge sample={sample} />
@@ -162,7 +166,7 @@ export function AppCard() {
       </div>
       <div className="min-w-0 border-t-2 p-3 pb-3.5" style={{ borderColor: YELLOW }}>
         <p className="text-xs font-medium tracking-wide text-muted">{SAMPLE_ACTIVE.category}</p>
-        <h3 className="line-clamp-2 break-words text-[15px] leading-snug font-bold text-ink">{SAMPLE_ACTIVE.title}</h3>
+        <h3 className="line-clamp-2 break-words text-[15px] leading-snug font-bold text-ink">{SAMPLE_ACTIVE.titleCard}</h3>
         <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
           <p className="flex items-baseline gap-1 leading-none whitespace-nowrap">
             <span className="text-[11px] font-bold text-muted">{SAMPLE_ACTIVE.priceLabel}</span>
@@ -215,7 +219,7 @@ export function MockHeroCard() {
       </div>
 
       <div className="p-3.5 sm:p-4">
-        <p className="line-clamp-2 text-sm font-bold leading-snug text-ink">{SAMPLE_ACTIVE.title}</p>
+        <p className="line-clamp-2 text-sm font-bold leading-snug text-ink">{SAMPLE_ACTIVE.titleCard}</p>
 
         <div className="mt-2.5 flex flex-wrap items-baseline gap-x-3 gap-y-1 border-y border-border py-2">
           <div className="flex items-baseline gap-1.5">

@@ -231,7 +231,7 @@ export function LandingPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex h-11 items-center justify-center rounded-full border-2 px-4 text-sm font-bold"
-                  style={{ borderColor: "#06C755", color: "#05813A" }}
+                  style={{ borderColor: "#06C755", color: "#046C30" }}
                 >
                   公式LINEを友だち追加
                 </a>
@@ -279,7 +279,7 @@ export function LandingPage() {
               </div>
               <p
                 className="mt-3 inline-flex items-center rounded-full px-3 py-1 text-sm font-bold"
-                style={{ background: "#E7F6EC", color: "#05813A" }}
+                style={{ background: "#E7F6EC", color: "#046C30" }}
               >
                 {SAMPLE_ACTIVE.dropLabel}
               </p>

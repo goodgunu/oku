@@ -31,13 +31,13 @@ function SignedOutNav({ placeholder = false }: { placeholder?: boolean }) {
     >
       <Link
         href="/#how"
-        className={`hidden sm:inline-flex ${PILL}`}
+        className="inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded-full border border-black/20 bg-black/[0.05] px-2.5 text-xs font-bold leading-none text-ink hover:bg-black/10 sm:px-3.5"
       >
         使い方
       </Link>
       <a
         href="/api/auth/line-login?next=%2F"
-        className="inline-flex h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-xs font-bold text-white shadow-xs sm:px-4 sm:text-sm"
+        className="inline-flex h-11 shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2.5 text-xs font-bold text-white shadow-xs sm:gap-1.5 sm:px-4 sm:text-sm"
         style={{ background: "#06C755" }}
         data-control="header-line"
         onClick={(event) => {
@@ -50,7 +50,7 @@ function SignedOutNav({ placeholder = false }: { placeholder?: boolean }) {
       </a>
       <button
         type="button"
-        className="inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded-full border border-black/15 bg-white px-3 text-xs font-extrabold text-black shadow-xs hover:bg-white/90 sm:px-4 sm:text-sm"
+        className="inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded-full border border-black/15 bg-white px-2.5 text-xs font-extrabold text-black shadow-xs hover:bg-white/90 sm:px-4 sm:text-sm"
         data-control="header-other"
         onClick={() => {
           savePendingUrl();

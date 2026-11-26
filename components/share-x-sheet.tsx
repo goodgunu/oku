@@ -232,7 +232,7 @@ export function ShareXSheet({
             ? "スマホでは、選んだ写真をつけてXアプリに渡します。つけられないときは、リンクカードつきの投稿画面を開きます。"
             : "選んだ写真と本文を、端末の共有メニューに渡します。共有メニューを使えないときは、共有ページのURLをコピーします。"}
         </p>
-        {copied && <p className="text-center text-sm font-bold text-[#05813A]">コピーしました</p>}
+        {copied && <p className="text-center text-sm font-bold text-[#046C30]">コピーしました</p>}
 
         <button
           type="button"

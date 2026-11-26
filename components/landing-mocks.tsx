@@ -2,7 +2,7 @@ import Image from "next/image";
 import { ArrowDown } from "lucide-react";
 
 const YELLOW = "#ffdc00";
-const YELLOW_ACCENT = "#D97706";
+const YELLOW_ACCENT = "#92400E";
 
 export const SAMPLE_ACTIVE = {
   site: "ヤフオク",

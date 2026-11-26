@@ -1,4 +1,3 @@
-import type { CSSProperties } from "react";
 import Image from "next/image";
 import { Camera, Check, ChevronLeft, ImageIcon, Mic, Plus, Search, Phone as PhoneIcon, Menu, X } from "lucide-react";
 import { MiniCard, SAMPLE_ACTIVE, SAMPLE_MERCARI, SamplePhoto } from "@/components/landing-mocks";
@@ -6,8 +5,6 @@ import { Reveal } from "@/lib/motion";
 
 const YELLOW = "#ffdc00";
 const LINE_GREEN = "#06C755";
-// コマ①②のシートがスマホ画面の下からにゅっとせり上がる動き（prefers-reduced-motion時はmotion.css側で自動無効化）
-const SHEET_MOTION_STYLE = { "--motion-distance": "100%", "--motion-dur-long": "520ms" } as CSSProperties;
 
 function Frame({ children, bg = "#F2F2F2", label, height = 300 }: { children: React.ReactNode; bg?: string; label: string; height?: number }) {
   return (
@@ -103,10 +100,10 @@ function ShareSheet() {
           <SamplePhoto src={SAMPLE_MERCARI.photo} />
         </div>
         <Reveal
-          variant="fade-up"
+          variant="sheet-up"
           delay={220}
           className="relative mx-1.5 mb-1.5 rounded-[22px] px-3 pt-3 pb-2"
-          style={{ ...SHEET_MOTION_STYLE, background: "linear-gradient(180deg, rgba(236,236,240,0.88), rgba(244,244,246,0.94))", backdropFilter: "blur(14px)", boxShadow: "0 0 0 0.5px rgba(0,0,0,0.12)" }}
+          style={{ background: "linear-gradient(180deg, rgba(236,236,240,0.88), rgba(244,244,246,0.94))", backdropFilter: "blur(14px)", boxShadow: "0 0 0 0.5px rgba(0,0,0,0.12)" }}
         >
           <div className="flex items-center gap-2.5 border-b pb-2.5" style={divider}>
             <span className="grid size-9 place-items-center rounded-[9px] text-[8px] leading-[10px] font-extrabold text-black" style={{ background: "linear-gradient(160deg,#FFDC00,#F5C400)" }}>
@@ -193,7 +190,7 @@ function ShareSheet() {
 function Forward() {
   return (
     <Frame label="LINEの転送画面で「おく」を選び、転送を押す（サンプル）" bg="#E8EAEE">
-      <Reveal variant="fade-up" delay={220} className="h-full rounded-t-[17px] bg-white" style={SHEET_MOTION_STYLE}>
+      <Reveal variant="sheet-up" delay={220} className="h-full rounded-t-[17px] bg-white">
         <div className="flex items-center justify-between px-3 pt-3">
           <span className="grid size-7 place-items-center rounded-full" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.12)", border: "1px solid #E3E3E6", background: "linear-gradient(180deg,#FFFFFF,#F4F4F6)" }}><X className="size-3.5" aria-hidden /></span>
           <span className="text-[11px] font-extrabold text-black">選択中 1</span>

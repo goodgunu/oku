@@ -250,10 +250,10 @@ export function LandingLineFlow() {
         </p>
         <ol className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, i) => (
-            // スクロールで見えたら1枚ずつスライドイン。番号の丸は見えたら黄色で埋まる（globals.css の .oku-step-dot）
+            // スクロールで見えたら1枚ずつスライドイン。番号の丸は見えたら黄色で埋まる（.motion-step-dot）
             <Reveal as="li" index={i} key={step.title} className="min-w-0 rounded-2xl border border-[#F3E5AB] p-4" style={{ background: "#FFF8D6" }}>
               <p className="flex items-center gap-2">
-                <span className="oku-step-dot grid size-6 shrink-0 place-items-center rounded-full border border-[#E5C200] text-xs font-extrabold text-black">
+                <span className="motion-step-dot grid size-6 shrink-0 place-items-center rounded-full border border-[#E5C200] text-xs font-extrabold text-black">
                   {i + 1}
                 </span>
                 <span className="text-sm font-bold text-ink">{step.title}</span>

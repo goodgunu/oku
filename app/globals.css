@@ -45,30 +45,8 @@ body:has([data-wide-page]) .site-shell {
 
 /*
  * おくだけの動き（値は lib/motion の共通CSS変数を使う。視差効果を減らす時は自動で0になる）
- * - .oku-step-dot … 使い方ステップの番号の丸。<Reveal> の中で、見えたら黄色が中から広がって埋まる
  * - .oku-card-press … 一覧カード。中のリンクを押している間だけ少し沈む（♡・消す・比べるでは沈まない）
  */
-.oku-step-dot {
-  position: relative;
-  isolation: isolate;
-}
-.oku-step-dot::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  z-index: -1;
-  border-radius: 9999px;
-  background: var(--yahoo);
-  transition: transform var(--motion-dur-long) var(--motion-ease-spring);
-  transition-delay: calc(var(--motion-delay, 0ms) + min(var(--motion-i, 0), 10) * var(--motion-stagger-step) + 150ms);
-}
-@media (prefers-reduced-motion: no-preference) {
-  /* motion-ready（動き出した後）だけ空にする。JSが遅い・動かない時は最初から埋まったまま */
-  html.motion-js.motion-ready [data-reveal]:not([data-revealed]) .oku-step-dot::before {
-    transform: scale(0);
-  }
-}
-
 .oku-card-press {
   transition: transform var(--motion-dur-short) var(--motion-ease-out);
 }

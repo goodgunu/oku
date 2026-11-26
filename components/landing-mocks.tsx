@@ -62,25 +62,27 @@ type Sample = {
 
 const PHOTO_BG = "#C5C3BE";
 
-export function SamplePhoto({ src = SAMPLE_ACTIVE.photo, className = "" }: { src?: string; className?: string }) {
+export function SamplePhoto({
+  src = SAMPLE_ACTIVE.photo,
+  className = "",
+  priority = false,
+}: {
+  src?: string;
+  className?: string;
+  /** ファーストビューの見本など、最初の描画から読み込みを始めたい時 */
+  priority?: boolean;
+}) {
+  // ぼかし用に同じ写真をもう一枚大きく載せるのはやめる（LCP が遅れる原因になる）。
+  // 背景色は呼び出し側のコンテナ（PHOTO_BG）に任せる。
   return (
-    <>
-      <Image
-        src={src}
-        alt=""
-        fill
-        sizes="(max-width: 640px) 100vw, 420px"
-        aria-hidden
-        className="pointer-events-none scale-125 object-cover blur-2xl"
-      />
-      <Image
-        src={src}
-        alt=""
-        fill
-        sizes="(max-width: 640px) 100vw, 420px"
-        className={`object-contain ${className}`}
-      />
-    </>
+    <Image
+      src={src}
+      alt=""
+      fill
+      sizes="(max-width: 640px) 100vw, 420px"
+      priority={priority}
+      className={`object-contain ${className}`}
+    />
   );
 }
 
@@ -211,7 +213,7 @@ export function MockHeroCard() {
       </div>
 
       <div className="relative aspect-[16/9] overflow-hidden" style={{ background: PHOTO_BG }}>
-        <SamplePhoto />
+        <SamplePhoto priority />
         <span className="absolute top-2.5 left-2.5 rounded-full bg-[#008a00] px-2.5 py-0.5 text-[10px] font-bold text-white">
           出品中
         </span>

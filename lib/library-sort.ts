@@ -1,6 +1,6 @@
 import type { ArchiveRecord } from "@/lib/types";
 
-export type SortKey = "saved" | "price" | "drop" | "bids";
+export type SortKey = "saved" | "ending" | "price" | "drop" | "bids";
 export type SortDir = "asc" | "desc";
 export type SortState = { key: SortKey; dir: SortDir } | null;
 
@@ -8,6 +8,7 @@ export const DEFAULT_SORT: { key: SortKey; dir: SortDir } = { key: "saved", dir:
 
 export const SORT_PRESETS: { id: string; label: string; sort: { key: SortKey; dir: SortDir } }[] = [
   { id: "saved-desc", label: "新しく保存した順", sort: { key: "saved", dir: "desc" } },
+  { id: "ending-asc", label: "終了が近い順", sort: { key: "ending", dir: "asc" } },
   { id: "price-asc", label: "価格の安い順", sort: { key: "price", dir: "asc" } },
   { id: "price-desc", label: "価格の高い順", sort: { key: "price", dir: "desc" } },
   { id: "drop-desc", label: "値下げの大きい順", sort: { key: "drop", dir: "desc" } },
@@ -29,7 +30,7 @@ export function priceDropYen(r: Pick<ArchiveRecord, "priceHistory">): number | n
   return drop > 0 ? drop : null;
 }
 
-function value(r: ArchiveRecord, key: SortKey): number | null {
+function value(r: ArchiveRecord, key: SortKey, nowMs: number): number | null {
   switch (key) {
     case "price":
       return r.priceYen;
@@ -37,6 +38,12 @@ function value(r: ArchiveRecord, key: SortKey): number | null {
       return priceDropYen(r);
     case "bids":
       return r.bidCount;
+    case "ending": {
+      if (r.availability === "ended") return null;
+      const t = Date.parse(r.endTime);
+      if (Number.isNaN(t) || t <= nowMs) return null;
+      return t;
+    }
     case "saved": {
       const t = Date.parse(r.savedAt);
       return Number.isNaN(t) ? null : t;
@@ -44,12 +51,12 @@ function value(r: ArchiveRecord, key: SortKey): number | null {
   }
 }
 
-export function sortListings(list: ArchiveRecord[], sort: SortState): ArchiveRecord[] {
+export function sortListings(list: ArchiveRecord[], sort: SortState, nowMs = Date.now()): ArchiveRecord[] {
   const { key, dir } = sort ?? DEFAULT_SORT;
   const mul = dir === "asc" ? 1 : -1;
   return [...list].sort((a, b) => {
-    const va = value(a, key);
-    const vb = value(b, key);
+    const va = value(a, key, nowMs);
+    const vb = value(b, key, nowMs);
     if (va == null && vb == null) return 0;
     if (va == null) return 1;
     if (vb == null) return -1;

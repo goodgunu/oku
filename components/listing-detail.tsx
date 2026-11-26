@@ -12,6 +12,7 @@ import { SpecChip } from "@/components/spec-chip";
 import { formatYen } from "@/lib/format";
 import { vtName } from "@/lib/motion";
 import { WATCH_STATUS_LABELS } from "@/lib/library-filter";
+import { endedPriceHeading } from "@/lib/format";
 import { priceChange } from "@/lib/price-history";
 import { sourceLabel } from "@/lib/source-labels";
 import { MERCARI_NOTE } from "@/lib/sources/mercari";
@@ -289,7 +290,7 @@ export function ListingDetail({ initialListing }: { initialListing: ArchiveRecor
         {listing.priceLabel && listing.priceLabel !== "—" ? (
           <p className="flex items-baseline gap-1.5 leading-none">
             <span className="text-xs font-bold text-muted">
-              {listing.priceKind === "current_bid" ? "現在価格" : "価格"}
+              {listing.availability === "ended" ? endedPriceHeading(listing) : listing.priceKind === "current_bid" ? "現在価格" : "価格"}
             </span>
             <span className="text-[26px] font-extrabold tabular-nums text-ink sm:text-3xl">{listing.priceLabel}</span>
           </p>

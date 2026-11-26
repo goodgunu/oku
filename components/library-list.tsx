@@ -10,6 +10,7 @@ import { DEFAULT_SORT, SORT_PRESETS, presetIdOf, sortListings, type SortState } 
 import { LibraryPager } from "@/components/library-pager";
 import { Collapse, NAV_FORWARD, SharedElement, Stagger, vtName } from "@/lib/motion";
 import { DEFAULT_PAGE_SIZE, PAGE_SIZES, PAGE_SIZE_KEY, paginate, parsePage, parsePageSize, type PageSize } from "@/lib/library-page";
+import { endedPriceHeading, formatRemainingTime } from "@/lib/format";
 import { priceChange } from "@/lib/price-history";
 import { sourceLabel } from "@/lib/source-labels";
 import type { ArchiveRecord } from "@/lib/types";
@@ -93,7 +94,7 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
     return true;
   });
 
-  const shown = sortListings(filtered, sort);
+  const shown = sortListings(filtered, sort, now);
   // 並べ替え・絞り込み・表示件数が変わったら1ページ目に戻す
   const pageResetKey = JSON.stringify([query, sourceFilter, statusFilter, favoritesOnly, sort, pageSize]);
   const [lastResetKey, setLastResetKey] = useState(pageResetKey);
@@ -281,8 +282,31 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
       </Collapse>
 
       {listings.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border bg-card px-5 py-12 text-center text-sm leading-7 text-muted">
-          まだ何も残っていません。上のフォームにURLを貼るか、LINEから共有してください。
+        <div className="rounded-2xl border border-[#F3E5AB] bg-[#FFF8D6]/60 px-5 py-6 text-left">
+          <p className="text-sm font-extrabold text-ink">まずは気になる出品を1件残してみましょう</p>
+          <p className="mt-1 text-xs leading-6 text-muted">
+            上の欄にURLを貼って「おく」を押すか、各アプリの共有メニューから公式LINE「おく」に送ると、ここにカードが並びます。
+          </p>
+          <ol className="mt-3 grid gap-2 text-xs leading-5 text-ink sm:grid-cols-2">
+            <li className="rounded-xl border border-[#F3E5AB] bg-white p-3">
+              <p className="font-bold">方法1：URLを貼って残す</p>
+              <p className="mt-1 text-muted">ヤフオク・メルカリ・PayPayフリマ・ジモティーのURLを上の欄に貼るだけ。</p>
+            </li>
+            <li className="rounded-xl border border-[#CBEFD8] bg-white p-3">
+              <p className="font-bold">方法2：LINEから共有して残す</p>
+              <p className="mt-1 text-muted">
+                公式LINE「おく」（@916kdopz）を友だち追加して、出品ページの共有ボタンから送ると自動で保存されます。
+              </p>
+              <a
+                href="https://line.me/R/ti/p/%40916kdopz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-flex h-8 items-center rounded-full bg-[#06C755] px-3 text-xs font-bold text-white hover:opacity-95"
+              >
+                公式LINEを友だち追加
+              </a>
+            </li>
+          </ol>
         </div>
       ) : (
         <>
@@ -458,6 +482,7 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
                 const thumb = first?.key ? `/api/photo/${item.id}/0` : first?.url;
                 const change = priceChange(item);
                 const compared = compareIds.includes(item.id);
+                const remaining = item.availability === "live" ? formatRemainingTime(item.endTime, now) : null;
                 return (
                   <li
                     key={item.id}
@@ -490,6 +515,17 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
                               {WATCH_STATUS_LABELS[item.watchStatus]}
                             </span>
                           )}
+                          {remaining && (
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                                remaining.urgent
+                                  ? "motion-pop bg-red-100 text-red-700"
+                                  : "bg-stone-100 text-stone-700"
+                              }`}
+                            >
+                              {remaining.label}
+                            </span>
+                          )}
                           {change && (
                             <span
                               className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
@@ -505,14 +541,19 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
                         <p className="line-clamp-2 break-words text-sm font-bold leading-snug text-ink">{item.title}</p>
                         {item.priceLabel && item.priceLabel !== "—" ? (
                           <p className="mt-1.5 text-base font-extrabold tabular-nums text-ink">
+                            {item.availability === "ended" ? (
+                              <span className="mr-1.5 text-[11px] font-bold text-muted">{endedPriceHeading(item)}</span>
+                            ) : null}
                             {item.priceLabel}
                             {item.bidCount != null ? (
-                              <span className="ml-2 text-xs font-medium text-muted">入札 {item.bidCount}</span>
+                              <span className="ml-2 text-xs font-medium text-muted">入札 {item.bidCount}件</span>
                             ) : null}
                           </p>
                         ) : null}
                         <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-xs text-muted">
-                          {item.endTimeLabel && <span>終了 {item.endTimeLabel}</span>}
+                          {item.endTimeLabel && (
+                            <span>{item.availability === "ended" ? "終了日" : "終了"} {item.endTimeLabel}</span>
+                          )}
                           {item.condition && <span>状態: {item.condition}</span>}
                           {item.shipping && <span>{item.shipping}</span>}
                         </div>

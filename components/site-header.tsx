@@ -29,6 +29,12 @@ function SignedOutNav({ placeholder = false }: { placeholder?: boolean }) {
       aria-hidden={placeholder ? true : undefined}
       inert={placeholder ? true : undefined}
     >
+      <Link
+        href="/#how"
+        className={`hidden sm:inline-flex ${PILL}`}
+      >
+        使い方
+      </Link>
       <a
         href="/api/auth/line-login?next=%2F"
         className="inline-flex h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-xs font-bold text-white shadow-xs sm:px-4 sm:text-sm"

@@ -20,7 +20,7 @@ const kept = [
   ["価格・送料", "現在価格や即決価格、送料も", JapaneseYen],
   ["状態・詳細", "商品の状態、カテゴリ、終了日時", BadgeCheck],
   ["出品者情報", "出品者名や発送元の地域", Store],
-  ["値下げ・終了の記録", "毎朝の自動確認で価格推移を記録", History],
+  ["価格推移・最終価格", "毎朝の自動確認で値下げ・アップ・最終価格を記録", History],
   ["自分のメモ", "状態の確認結果や相場比較メモ", NotebookPen],
 ] as const;
 
@@ -73,8 +73,36 @@ export function LandingPage() {
             <p className="mt-3 max-w-xl text-sm leading-7 text-ink/85 sm:text-base">
               オークションやフリマの出品は、落札や掲載終了で見られなくなります。URLを残すと、価格も写真も、自分のアカウントに残ります。
             </p>
-            <p className="mt-2.5 text-xs leading-6 font-medium sm:text-sm" style={{ color: "#92400E" }}>
-              各サイトやアプリの共有から、LINEの「おく」に送っても残せます。
+            <div className="mt-4 flex flex-wrap items-center gap-2.5">
+              <a
+                href="/api/auth/line-login?next=%2F"
+                className="motion-press inline-flex h-12 items-center justify-center gap-2 rounded-full px-6 text-sm font-extrabold text-white shadow-sm hover:opacity-95"
+                style={{ background: "#06C755" }}
+                onClick={(event) => {
+                  if (!guardOnceClick(event)) return;
+                  const pending = url.trim();
+                  if (pending) {
+                    try {
+                      sessionStorage.setItem("oku-pending-url", pending);
+                    } catch {
+                      /* ignore */
+                    }
+                  }
+                }}
+              >
+                <Image src="/icon-line.png" alt="" width={18} height={17} />
+                LINEではじめる（無料）
+              </a>
+              <button
+                type="button"
+                onClick={() => openLogin()}
+                className="inline-flex h-12 items-center justify-center rounded-full border border-black/15 bg-white px-4 text-xs font-bold text-ink hover:bg-white/90 sm:text-sm"
+              >
+                メール・Googleなど
+              </button>
+            </div>
+            <p className="mt-2 text-xs leading-5" style={{ color: "#92400E" }}>
+              登録後に公式LINEの友だち追加と連携を案内します。下の欄にURLを貼って始めることもできます。
             </p>
 
             <form
@@ -144,7 +172,7 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* 毎日自動で確認。値下げもすぐわかる。 */}
+      {/* 毎朝自動でチェック。価格の動きも残る。 */}
       <section
         id="daily-check"
         className="overflow-hidden rounded-3xl border border-[#E5C200]"
@@ -152,14 +180,14 @@ export function LandingPage() {
       >
         <div className="mx-auto grid max-w-6xl items-center gap-6 px-4 py-8 sm:px-7 sm:py-10 lg:grid-cols-2 lg:gap-10">
           <Reveal className="min-w-0">
-            <p className="text-xs font-extrabold tracking-[0.14em] text-black/75">毎日、自動でチェック</p>
+            <p className="text-xs font-extrabold tracking-[0.14em] text-black/75">毎朝7時ごろに自動チェック</p>
             <h2 className="mt-2 text-[1.65rem] leading-snug font-extrabold tracking-tight text-black sm:text-4xl">
-              毎日自動で確認。
+              毎朝自動でチェック。
               <br />
-              値下げもすぐわかる。
+              価格の動きも残る。
             </h2>
             <p className="mt-3 max-w-md text-sm leading-7 text-black/85 sm:text-base">
-              残した出品は、毎日自動でチェック。価格が下がると、一覧に「値下げ」と出ます。
+              残した出品は毎朝1回、自動で状態を確認します。フリマの値下げだけでなく、ヤフオクの入札による価格アップや終了時の最終価格も履歴に残ります。
             </p>
             <div
               className="mt-5 max-w-md rounded-2xl bg-white p-4 shadow-lg"
@@ -174,10 +202,10 @@ export function LandingPage() {
                 >
                   <Image src="/icon-line.png" alt="" width={16} height={15} />
                 </span>
-                値下げや終了を、LINEでお知らせ
+                お気に入りの値下げ・終了をLINEでお知らせ
               </p>
               <p className="mt-2 text-sm leading-6" style={{ color: "#57534E" }}>
-                LINEで連携すると、お気に入りに登録した出品の値下げや落札・掲載終了が見つかった日に、LINEへお知らせが届きます（1日1通にまとめます）。
+                通知が届くのは<strong>お気に入り（♥）に登録した出品だけ</strong>です。値下げや終了が見つかった朝に、1日1通にまとめてLINEへ届きます（リアルタイム通知ではありません）。
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <a
@@ -349,7 +377,7 @@ export function LandingPage() {
           <Reveal>
             <h2 className="text-lg font-bold text-ink">LINEに送ると、その場で残る</h2>
             <p className="mt-2 max-w-2xl text-sm leading-7 text-muted">
-              下のボタンで公式LINE「おく」を友だち追加します。IDは {LINE_ACCOUNT_ID} です。追加したあと、各サイトの共有から「おく」を選ぶと、アカウントに保存されます。
+              下のボタンで公式LINE「おく」（{LINE_ACCOUNT_ID}）を友だち追加すると、各サイトの共有からURLを送って保存できます。アカウント未連携のままURLを送った場合も、その場で連携用の案内リンクが返信されるので、開くだけで登録と保存が完了します。
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <a
@@ -363,6 +391,27 @@ export function LandingPage() {
               </a>
             </div>
           </Reveal>
+        </div>
+      </section>
+
+      {/* 料金・保存上限・保存期間 */}
+      <section className="rounded-3xl border border-border bg-white px-4 py-6 sm:px-7">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="text-base font-bold text-ink">料金・保存について</h2>
+          <dl className="mt-3 grid gap-3 text-xs leading-6 sm:grid-cols-3">
+            <div className="rounded-2xl border border-border bg-[#FAF7F2] p-3.5">
+              <dt className="font-bold text-ink">利用料金</dt>
+              <dd className="mt-1 text-muted">現在はすべての機能を無料で使えます。</dd>
+            </div>
+            <div className="rounded-2xl border border-border bg-[#FAF7F2] p-3.5">
+              <dt className="font-bold text-ink">保存件数・保存期間</dt>
+              <dd className="mt-1 text-muted">現在、保存件数や保存期間の上限は設けていません。自分で消すまでアカウントに残ります。</dd>
+            </div>
+            <div className="rounded-2xl border border-border bg-[#FAF7F2] p-3.5">
+              <dt className="font-bold text-ink">チェック頻度・ご注意</dt>
+              <dd className="mt-1 text-muted">自動確認は毎朝1回です。元ページが削除済み・非公開の場合は取得できないことがあります。</dd>
+            </div>
+          </dl>
         </div>
       </section>
 

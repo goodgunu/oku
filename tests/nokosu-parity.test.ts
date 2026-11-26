@@ -5,6 +5,7 @@ import { messageFromClerkXError, X_ALREADY_USED_MESSAGE } from "../lib/clerk-x-e
 import { resolveClerkAccountKey } from "../lib/current-user";
 import { COMPARE_ROWS, bestIds } from "../lib/compare-rows";
 import { matchesQuery, sourceCounts } from "../lib/library-filter";
+import { endedPriceHeading, formatRemainingTime } from "../lib/format";
 import { sortListings } from "../lib/library-sort";
 import { digestText } from "../lib/notify";
 import { priceHistoryAfter, priceChange } from "../lib/price-history";
@@ -141,4 +142,26 @@ test("publicListingOf omits private memo and seller", () => {
   assert.equal(pub.name, "テスト出品");
   assert.equal("memo" in pub, false);
   assert.equal("seller" in pub, false);
+});
+
+test("formatRemainingTime, endedPriceHeading, and ending-asc sort work", () => {
+  const now = Date.parse("2026-11-26T12:00:00.000Z");
+  assert.deepEqual(formatRemainingTime("2026-11-26T12:45:00.000Z", now), { label: "あと45分", urgent: true });
+  assert.deepEqual(formatRemainingTime("2026-11-26T15:30:00.000Z", now), { label: "あと3時間", urgent: false });
+  assert.deepEqual(formatRemainingTime("2026-11-28T15:00:00.000Z", now), { label: "あと2日", urgent: false });
+  assert.equal(formatRemainingTime("2026-11-26T11:00:00.000Z", now), null);
+
+  assert.equal(endedPriceHeading({ source: "yahoo-auction", bidCount: 3 }), "落札価格");
+  assert.equal(endedPriceHeading({ source: "yahoo-auction", bidCount: 0 }), "最終価格");
+  assert.equal(endedPriceHeading({ source: "mercari", bidCount: null }), "最終価格");
+
+  const soon = sampleRecord({ id: "soon", availability: "live", endTime: "2026-11-26T13:00:00.000Z" });
+  const later = sampleRecord({ id: "later", availability: "live", endTime: "2026-11-27T13:00:00.000Z" });
+  const ended = sampleRecord({ id: "ended", availability: "ended", endTime: "2026-11-26T12:30:00.000Z" });
+  const noEnd = sampleRecord({ id: "noEnd", availability: "live", endTime: "" });
+  const ordered = sortListings([ended, later, noEnd, soon], { key: "ending", dir: "asc" }, now);
+  assert.deepEqual(
+    ordered.map((x) => x.id),
+    ["soon", "later", "ended", "noEnd"],
+  );
 });

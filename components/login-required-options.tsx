@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { LoginOptions } from "@/components/login-options";
+import { guardOnceClick } from "@/lib/once-click";
 
 /** ログイン後に今のページへ戻れるよう、今のURLを渡す。Clerk未設定の環境ではLINEだけ出す。 */
 export function LoginRequiredOptions({ clerk }: { clerk: boolean }) {
@@ -16,6 +17,7 @@ export function LoginRequiredOptions({ clerk }: { clerk: boolean }) {
   return (
     <a
       href={`/api/auth/line-login?next=${encodeURIComponent(here)}`}
+      onClick={guardOnceClick}
       className="flex h-12 w-full items-center justify-center gap-3 rounded-full text-base font-bold text-white shadow-sm"
       style={{ background: "#06C755" }}
     >

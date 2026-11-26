@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { AccountButton } from "@/components/account-button";
 import { Wordmark } from "@/components/wordmark";
+import { guardOnceClick } from "@/lib/once-click";
 
 const PILL =
   "h-11 shrink-0 items-center whitespace-nowrap rounded-full border border-black/20 bg-black/[0.05] px-3.5 text-xs font-bold leading-none text-ink hover:bg-black/10";
@@ -55,7 +56,10 @@ export function SiteHeader() {
               className="inline-flex h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-xs font-bold text-white shadow-xs sm:px-4 sm:text-sm"
               style={{ background: "#06C755" }}
               data-control="header-line"
-              onClick={savePendingUrl}
+              onClick={(event) => {
+                if (!guardOnceClick(event)) return;
+                savePendingUrl();
+              }}
             >
               <Image src="/icon-line.png" alt="" width={14} height={14} />
               LINEではじめる

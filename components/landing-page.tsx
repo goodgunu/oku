@@ -9,6 +9,7 @@ import { MockHeroCard, MockList, SAMPLE_ACTIVE, SamplePhoto } from "@/components
 import { LoginOptions } from "@/components/login-options";
 import { Wordmark } from "@/components/wordmark";
 import { Reveal, Stagger } from "@/lib/motion";
+import { guardOnceClick } from "@/lib/once-click";
 
 const YELLOW = "#ffdc00";
 const LINE_ACCOUNT_ID = "@916kdopz";
@@ -180,7 +181,8 @@ export function LandingPage() {
                   href="/api/auth/line-login?next=%2F"
                   className="inline-flex h-11 items-center justify-center rounded-full px-5 text-sm font-bold text-white"
                   style={{ background: "#06C755" }}
-                  onClick={() => {
+                  onClick={(event) => {
+                    if (!guardOnceClick(event)) return;
                     const pending = url.trim();
                     if (pending) {
                       try {

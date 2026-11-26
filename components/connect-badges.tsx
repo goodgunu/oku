@@ -31,7 +31,10 @@ export function ConnectBadges() {
     };
   }, []);
 
+  const [linking, setLinking] = useState(false);
   function linkLine() {
+    if (linking) return;
+    setLinking(true);
     const here = `${window.location.pathname}${window.location.search}`;
     const next = here.startsWith("/sso-callback") ? "/" : here;
     window.location.href = `/api/auth/line-login?link=1&next=${encodeURIComponent(next)}`;

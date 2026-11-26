@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { guardOnceClick } from "@/lib/once-click";
 
 type State = {
   loading: boolean;
@@ -83,6 +84,7 @@ export function NotifySettingCard() {
       ) : !state.lineLinked ? (
         <a
           href="/api/auth/line-login?link=1&next=%2F"
+          onClick={guardOnceClick}
           className="motion-crossfade motion-press inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 text-xs font-bold text-white shadow-xs"
           style={{ background: "#06C755" }}
         >

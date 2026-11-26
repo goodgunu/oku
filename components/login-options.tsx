@@ -5,6 +5,7 @@ import type { OAuthStrategy } from "@clerk/shared/types";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { messageFromClerkXError } from "@/lib/clerk-x-errors";
+import { guardOnceClick } from "@/lib/once-click";
 
 type OAuthProvider = {
   id: string;
@@ -167,7 +168,10 @@ export function LoginOptions({ redirectUrl = "/", onBeforeStart }: { redirectUrl
           {/* 並び順: LINE、X、Google、Yahoo!（設定済みのときだけ）、メール */}
           <a
             href={`/api/auth/line-login?next=${next}`}
-            onClick={() => onBeforeStart?.()}
+            onClick={(event) => {
+              if (!guardOnceClick(event)) return;
+              onBeforeStart?.();
+            }}
             className="flex h-12 w-full items-center justify-center gap-3 rounded-full text-base font-bold text-white shadow-sm"
             style={{ background: "#06C755" }}
           >

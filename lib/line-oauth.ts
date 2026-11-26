@@ -43,14 +43,23 @@ export function startLineLogin(
   redirectUri: string,
   nextPath: string,
   linkAccount?: string,
+  existingCookie?: string,
 ) {
-  const pending: Pending = {
-    state: randomBytes(16).toString("hex"),
-    nonce: randomBytes(16).toString("hex"),
-    next: safeNext(nextPath),
-    ...(linkAccount ? { link: linkAccount } : {}),
-    exp: Date.now() + 10 * 60 * 1000,
-  };
+  const next = safeNext(nextPath);
+  const existing = existingCookie ? readLinePending(existingCookie, secret) : null;
+  const sameLink = (existing?.link || undefined) === (linkAccount || undefined);
+  // 短時間に開始が二重に来ると state クッキーが上書きされ、先に戻ってきた callback が失敗する。
+  // 行き先が同じなら、まだ有効な開始を使い回す。
+  const pending: Pending =
+    existing && existing.next === next && sameLink
+      ? existing
+      : {
+          state: randomBytes(16).toString("hex"),
+          nonce: randomBytes(16).toString("hex"),
+          next,
+          ...(linkAccount ? { link: linkAccount } : {}),
+          exp: Date.now() + 10 * 60 * 1000,
+        };
   const payload = Buffer.from(JSON.stringify(pending)).toString("base64url");
   const url = new URL(AUTHORIZE);
   url.searchParams.set("response_type", "code");

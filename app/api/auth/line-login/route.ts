@@ -1,6 +1,7 @@
 import { currentUser } from "@/lib/current-user";
 import { safeNext } from "@/lib/line-login";
 import { LINE_STATE_COOKIE, lineCallbackUri, lineLoginConfig, startLineLogin } from "@/lib/line-oauth";
+import { readCookie } from "@/lib/session";
 import { authSecret } from "@/lib/store";
 
 export async function GET(request: Request) {
@@ -32,6 +33,7 @@ export async function GET(request: Request) {
     redirectUri,
     next,
     linkAccount,
+    readCookie(request.headers.get("cookie"), LINE_STATE_COOKIE),
   );
   const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
   return new Response(null, {

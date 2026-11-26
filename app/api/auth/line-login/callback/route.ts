@@ -30,16 +30,26 @@ export async function GET(request: Request) {
   }
   const state = url.searchParams.get("state") || "";
   const code = url.searchParams.get("code") || "";
+  const error = url.searchParams.get("error") || "";
   const pending = readLinePending(readCookie(request.headers.get("cookie"), LINE_STATE_COOKIE), await authSecret());
   if (!pending) {
     return redirectWith(url.origin, "/", "expired");
   }
+  if (error === "access_denied") {
+    return redirectWith(url.origin, pending.next, "denied");
+  }
   if (!code || state !== pending.state) {
+    console.warn("[line-login] callback rejected", {
+      hasCode: Boolean(code),
+      stateMatch: state === pending.state,
+      error: error || undefined,
+    });
     return redirectWith(url.origin, pending.next, "failed");
   }
   const redirectUri = lineCallbackUri(request);
   const profile = await exchangeLineCode(code, redirectUri, pending.nonce, config);
   if (!profile) {
+    console.warn("[line-login] token exchange failed");
     return redirectWith(url.origin, pending.next, "failed");
   }
 

@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import Image from "next/image";
 import { Camera, Check, ChevronLeft, ImageIcon, Mic, Plus, Search, Phone as PhoneIcon, Menu, X } from "lucide-react";
 import { MiniCard, SAMPLE_ACTIVE, SAMPLE_MERCARI, SamplePhoto } from "@/components/landing-mocks";
@@ -5,6 +6,8 @@ import { Reveal } from "@/lib/motion";
 
 const YELLOW = "#ffdc00";
 const LINE_GREEN = "#06C755";
+// コマ①②のシートがスマホ画面の下からにゅっとせり上がる動き（prefers-reduced-motion時はmotion.css側で自動無効化）
+const SHEET_MOTION_STYLE = { "--motion-distance": "100%", "--motion-dur-long": "520ms" } as CSSProperties;
 
 function Frame({ children, bg = "#F2F2F2", label, height = 300 }: { children: React.ReactNode; bg?: string; label: string; height?: number }) {
   return (
@@ -99,9 +102,11 @@ function ShareSheet() {
         <div className="absolute inset-x-0 top-0 h-24 overflow-hidden opacity-75 blur-[1px]" style={{ background: "#C5C3BE" }}>
           <SamplePhoto src={SAMPLE_MERCARI.photo} />
         </div>
-        <div
+        <Reveal
+          variant="fade-up"
+          delay={220}
           className="relative mx-1.5 mb-1.5 rounded-[22px] px-3 pt-3 pb-2"
-          style={{ background: "linear-gradient(180deg, rgba(236,236,240,0.88), rgba(244,244,246,0.94))", backdropFilter: "blur(14px)", boxShadow: "0 0 0 0.5px rgba(0,0,0,0.12)" }}
+          style={{ ...SHEET_MOTION_STYLE, background: "linear-gradient(180deg, rgba(236,236,240,0.88), rgba(244,244,246,0.94))", backdropFilter: "blur(14px)", boxShadow: "0 0 0 0.5px rgba(0,0,0,0.12)" }}
         >
           <div className="flex items-center gap-2.5 border-b pb-2.5" style={divider}>
             <span className="grid size-9 place-items-center rounded-[9px] text-[8px] leading-[10px] font-extrabold text-black" style={{ background: "linear-gradient(160deg,#FFDC00,#F5C400)" }}>
@@ -178,7 +183,7 @@ function ShareSheet() {
             <Cell label={"“ファイル”に保存"} icon={<ActionCircle><path d="M3.500 7.500a2 2 0 0 1 2-2h4l2 2h7a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z" /></ActionCircle>} />
             <Cell label="表示を増やす" icon={<ActionCircle><path d="M6 9.500l6 6 6-6" /></ActionCircle>} />
           </div>
-        </div>
+        </Reveal>
       </div>
     </Frame>
   );
@@ -187,22 +192,24 @@ function ShareSheet() {
 // 2. LINEの転送画面
 function Forward() {
   return (
-    <Frame label="LINEの転送画面で「おく」を選び、転送を押す（サンプル）" bg="#FFFFFF">
-      <div className="flex items-center justify-between px-3 pt-3">
-        <span className="grid size-7 place-items-center rounded-full" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.12)", border: "1px solid #E3E3E6", background: "linear-gradient(180deg,#FFFFFF,#F4F4F6)" }}><X className="size-3.5" aria-hidden /></span>
-        <span className="text-[11px] font-extrabold text-black">選択中 1</span>
-        <span className="rounded-full px-3 py-1 text-[11px] font-bold" style={{ color: "#4A6CF7", boxShadow: "0 1px 4px rgba(0,0,0,0.12)", border: "1px solid #E3E3E6", background: "linear-gradient(180deg,#FFFFFF,#F4F4F6)" }}>転送</span>
-      </div>
-      <p className="px-3 pt-3 text-[10px] font-bold" style={{ color: "#666" }}>最近の履歴</p>
-      {[true, false, false, false].map((checked, i) => (
-        <div key={i} className="flex items-center gap-2.5 px-3 py-1.5">
-          {i === 0 ? <OkuIcon size={32} badge={false} /> : <Dummy size={32} />}
-          <span className="flex-1 text-[11px]" style={{ color: i === 0 ? "#111" : "#666" }}>{i === 0 ? "おく" : "友だち"}</span>
-          <span className="grid size-5 place-items-center rounded-full border" style={checked ? { background: LINE_GREEN, borderColor: LINE_GREEN } : undefined}>
-            {checked && <Check className="size-3 text-white" aria-hidden />}
-          </span>
+    <Frame label="LINEの転送画面で「おく」を選び、転送を押す（サンプル）" bg="#E8EAEE">
+      <Reveal variant="fade-up" delay={220} className="h-full rounded-t-[17px] bg-white" style={SHEET_MOTION_STYLE}>
+        <div className="flex items-center justify-between px-3 pt-3">
+          <span className="grid size-7 place-items-center rounded-full" style={{ boxShadow: "0 1px 4px rgba(0,0,0,0.12)", border: "1px solid #E3E3E6", background: "linear-gradient(180deg,#FFFFFF,#F4F4F6)" }}><X className="size-3.5" aria-hidden /></span>
+          <span className="text-[11px] font-extrabold text-black">選択中 1</span>
+          <span className="rounded-full px-3 py-1 text-[11px] font-bold" style={{ color: "#4A6CF7", boxShadow: "0 1px 4px rgba(0,0,0,0.12)", border: "1px solid #E3E3E6", background: "linear-gradient(180deg,#FFFFFF,#F4F4F6)" }}>転送</span>
         </div>
-      ))}
+        <p className="px-3 pt-3 text-[10px] font-bold" style={{ color: "#666" }}>最近の履歴</p>
+        {[true, false, false, false].map((checked, i) => (
+          <div key={i} className="flex items-center gap-2.5 px-3 py-1.5">
+            {i === 0 ? <OkuIcon size={32} badge={false} /> : <Dummy size={32} />}
+            <span className="flex-1 text-[11px]" style={{ color: i === 0 ? "#111" : "#666" }}>{i === 0 ? "おく" : "友だち"}</span>
+            <span className="grid size-5 place-items-center rounded-full border" style={checked ? { background: LINE_GREEN, borderColor: LINE_GREEN } : undefined}>
+              {checked && <Check className="size-3 text-white" aria-hidden />}
+            </span>
+          </div>
+        ))}
+      </Reveal>
     </Frame>
   );
 }

@@ -4,7 +4,9 @@ import { jaJP } from "@clerk/localizations";
 import { AuthNotice } from "@/components/auth-notice";
 import { SiteHeader } from "@/components/site-header";
 import { clerkEnabled } from "@/lib/account";
+import { MotionBoot } from "@/lib/motion/motion-boot";
 import "./globals.css";
+import "@/lib/motion/motion.css";
 
 const SITE_URL = "https://oku-bice.vercel.app";
 const SITE_TITLE = "おく｜気になった出品を、消える前に残す";
@@ -49,8 +51,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </>
   );
   return (
-    <html lang="ja" className="h-full antialiased">
+    <html lang="ja" className="h-full antialiased" suppressHydrationWarning>
       <body className="min-h-full overflow-x-hidden bg-background text-foreground">
+        <MotionBoot />
         {enabled ? (
           <ClerkProvider
             localization={jaJP}

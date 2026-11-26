@@ -78,6 +78,14 @@ test("priceHistoryAfter tracks changes and priceChange computes delta", () => {
   assert.ok(change);
   assert.equal(change.direction, "down");
   assert.equal(change.deltaYen, -2000);
+  assert.equal(change.deltaText, "2,000円値下げ");
+
+  const h3 = priceHistoryAfter(initial, "22,000円", 22000, "2026-10-29T00:00:00.000Z");
+  const up = priceChange(sampleRecord({ priceYen: 22000, priceLabel: "22,000円", priceHistory: h3 }));
+  assert.ok(up);
+  assert.equal(up.direction, "up");
+  assert.equal(up.deltaYen, 2000);
+  assert.equal(up.deltaText, "2,000円アップ");
 });
 
 test("digestText formats おくからのお知らせ", () => {

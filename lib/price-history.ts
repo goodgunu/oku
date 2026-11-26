@@ -57,7 +57,7 @@ export function priceChange(record: Pick<ArchiveRecord, "priceHistory" | "priceL
   return {
     direction,
     deltaYen: delta,
-    deltaText: `${abs.toLocaleString("ja-JP")}円${direction === "down" ? "値下げ" : "値上げ"}`,
+    deltaText: `${abs.toLocaleString("ja-JP")}円${direction === "down" ? "値下げ" : "アップ"}`,
     fromText: first.priceLabel || formatYen(first.priceYen),
     toText: last.priceLabel || formatYen(last.priceYen),
   };

@@ -21,6 +21,50 @@ function savePendingUrl() {
   }
 }
 
+function SignedOutNav({ placeholder = false }: { placeholder?: boolean }) {
+  return (
+    <nav
+      className={`flex shrink-0 items-center gap-1.5 sm:gap-2${placeholder ? " invisible" : ""}`}
+      aria-label={placeholder ? undefined : "ログイン"}
+      aria-hidden={placeholder ? true : undefined}
+      inert={placeholder ? true : undefined}
+    >
+      <a
+        href="/api/auth/line-login?next=%2F"
+        className="inline-flex h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-xs font-bold text-white shadow-xs sm:px-4 sm:text-sm"
+        style={{ background: "#06C755" }}
+        data-control="header-line"
+        onClick={(event) => {
+          if (!guardOnceClick(event)) return;
+          savePendingUrl();
+        }}
+      >
+        <Image src="/icon-line.png" alt="" width={14} height={14} />
+        LINEではじめる
+      </a>
+      <button
+        type="button"
+        className="inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded-full border border-black/15 bg-white px-3 text-xs font-extrabold text-black shadow-xs hover:bg-white/90 sm:px-4 sm:text-sm"
+        data-control="header-other"
+        onClick={() => {
+          savePendingUrl();
+          const inline = document.getElementById("login-options");
+          if (inline) {
+            inline.scrollIntoView({ behavior: "smooth", block: "center" });
+          } else if (document.querySelector("[data-wide-page]")) {
+            window.dispatchEvent(new Event("oku-open-login"));
+          } else {
+            window.location.assign("/");
+          }
+        }}
+      >
+        <span className="sm:hidden">ほかの方法</span>
+        <span className="hidden sm:inline">メール・Googleなど</span>
+      </button>
+    </nav>
+  );
+}
+
 export function SiteHeader() {
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [clerkActive, setClerkActive] = useState(false);
@@ -37,7 +81,7 @@ export function SiteHeader() {
 
   return (
     <header className="border-b border-black/10 bg-yahoo">
-      <div className="site-shell mx-auto flex max-w-4xl items-center justify-between gap-2 px-3 py-2 sm:gap-4 sm:px-6">
+      <div className="site-shell mx-auto flex min-h-15 max-w-4xl items-center justify-between gap-2 px-3 py-2 sm:gap-4 sm:px-6">
         <Link href="/" aria-label="おく ホーム" className="shrink-0">
           <Wordmark height={30} />
         </Link>
@@ -49,42 +93,11 @@ export function SiteHeader() {
             </Link>
             <AccountButton signedIn={signedIn} clerkActive={clerkActive} />
           </div>
-        ) : signedIn === false ? (
-          <nav className="flex shrink-0 items-center gap-1.5 sm:gap-2" aria-label="ログイン">
-            <a
-              href="/api/auth/line-login?next=%2F"
-              className="inline-flex h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 text-xs font-bold text-white shadow-xs sm:px-4 sm:text-sm"
-              style={{ background: "#06C755" }}
-              data-control="header-line"
-              onClick={(event) => {
-                if (!guardOnceClick(event)) return;
-                savePendingUrl();
-              }}
-            >
-              <Image src="/icon-line.png" alt="" width={14} height={14} />
-              LINEではじめる
-            </a>
-            <button
-              type="button"
-              className="inline-flex h-11 shrink-0 items-center whitespace-nowrap rounded-full border border-black/15 bg-white px-3 text-xs font-extrabold text-black shadow-xs hover:bg-white/90 sm:px-4 sm:text-sm"
-              data-control="header-other"
-              onClick={() => {
-                savePendingUrl();
-                const inline = document.getElementById("login-options");
-                if (inline) {
-                  inline.scrollIntoView({ behavior: "smooth", block: "center" });
-                } else if (document.querySelector("[data-wide-page]")) {
-                  window.dispatchEvent(new Event("oku-open-login"));
-                } else {
-                  window.location.assign("/");
-                }
-              }}
-            >
-              <span className="sm:hidden">ほかの方法</span>
-              <span className="hidden sm:inline">メール・Googleなど</span>
-            </button>
-          </nav>
-        ) : null}
+        ) : (
+          // 確認中（null）も同じ幅・高さの枠を見えない状態で置いておき、
+          // ログイン確認が終わった時にヘッダーの高さや並びがずれないようにする
+          <SignedOutNav placeholder={signedIn === null} />
+        )}
       </div>
     </header>
   );

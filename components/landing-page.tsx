@@ -57,8 +57,11 @@ export function LandingPage() {
         style={{ background: "#FFF8D6", color: "#1C1917" }}
       >
         <div className="mx-auto grid max-w-6xl items-center gap-6 px-4 py-7 sm:px-7 sm:py-10 lg:grid-cols-[minmax(0,1.12fr)_minmax(260px,0.88fr)] lg:gap-8">
-          {/* 開いた時に、見出し→説明→フォームの順にふわっと出る */}
-          <Stagger className="min-w-0">
+          {/*
+            見出しと説明（LCP 要素の説明文を含む先頭 4 件）は最初の描画からそのまま見せ、
+            フォームだけ開いた瞬間にふわっと出す（immediate なので「見えたら」を待たない）
+          */}
+          <Stagger className="min-w-0" immediate skip={4}>
             <p className="text-xs font-bold tracking-[0.12em]" style={{ color: "#B45309" }}>
               落札や掲載終了の前に · ヤフオク・メルカリ・PayPayフリマ・ジモティー対応
             </p>
@@ -135,7 +138,7 @@ export function LandingPage() {
             </form>
           </Stagger>
 
-          <Reveal className="min-w-0" delay={180}>
+          <Reveal className="min-w-0" delay={180} immediate>
             <MockHeroCard />
           </Reveal>
         </div>

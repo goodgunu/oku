@@ -38,5 +38,20 @@ export function LineConnectScreen({ code }: { code: string }) {
     };
   }, [code, router]);
 
-  return <p className="py-10 text-center text-sm leading-7 text-muted">{message}</p>;
+  const connecting = Boolean(code) && message.endsWith("…");
+  return (
+    <div className="py-10 text-center">
+      {connecting && (
+        // つないでいる間は、3つの点が順に光る
+        <p className="oku-dots mb-3 flex justify-center gap-1.5" aria-hidden>
+          <span className="size-2.5 rounded-full bg-[#06C755]" />
+          <span className="size-2.5 rounded-full bg-[#06C755]" />
+          <span className="size-2.5 rounded-full bg-[#06C755]" />
+        </p>
+      )}
+      <p key={message} className="motion-crossfade text-sm leading-7 text-muted" role="status">
+        {message}
+      </p>
+    </div>
+  );
 }

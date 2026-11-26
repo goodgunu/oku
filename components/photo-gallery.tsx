@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { SharedElement } from "@/lib/motion";
 
 export type GalleryPhoto = {
   url?: string;
@@ -22,7 +23,16 @@ export function PhotoNote({ caption, category }: { caption?: string; category?: 
   );
 }
 
-export function PhotoGallery({ photos, title = "" }: { photos: GalleryPhoto[]; title?: string }) {
+export function PhotoGallery({
+  photos,
+  title = "",
+  transitionName,
+}: {
+  photos: GalleryPhoto[];
+  title?: string;
+  /** 一覧のサムネとつなぐ名前（View Transitions）。1枚目にだけ付ける */
+  transitionName?: string;
+}) {
   const [open, setOpen] = useState(false);
   const [index, setIndex] = useState(0);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
@@ -91,7 +101,7 @@ export function PhotoGallery({ photos, title = "" }: { photos: GalleryPhoto[]; t
         {photos.map((photo, i) => {
           const src = photo.url || photo.src || "";
           const alt = photo.caption || photo.category || photo.alt || title;
-          return (
+          const button = (
             <button
               key={`${src}-${i}`}
               type="button"
@@ -102,14 +112,21 @@ export function PhotoGallery({ photos, title = "" }: { photos: GalleryPhoto[]; t
               className="overflow-hidden rounded-lg border border-border bg-card shadow-sm transition hover:opacity-95"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={src} alt={alt} loading="lazy" className="aspect-[4/3] w-full object-cover" />
+              <img src={src} alt={alt} loading={i === 0 ? undefined : "lazy"} className="aspect-[4/3] w-full object-cover" />
             </button>
+          );
+          return i === 0 && transitionName ? (
+            <SharedElement key={`${src}-${i}`} name={transitionName}>
+              {button}
+            </SharedElement>
+          ) : (
+            button
           );
         })}
       </div>
 
       {open && (
-        <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex flex-col bg-black/90" onClick={close}>
+        <div role="dialog" aria-modal="true" className="motion-crossfade fixed inset-0 z-50 flex flex-col bg-black/90" onClick={close}>
           <div className="flex items-center justify-between px-4 py-3 text-white" onClick={(e) => e.stopPropagation()}>
             <span className="text-sm font-medium tabular-nums">
               {index + 1} / {photos.length}

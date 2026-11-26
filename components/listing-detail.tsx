@@ -10,6 +10,7 @@ import { PhotoPicker } from "@/components/photo-picker";
 import { ShareXSheet, XIcon } from "@/components/share-x-sheet";
 import { SpecChip } from "@/components/spec-chip";
 import { formatYen } from "@/lib/format";
+import { vtName } from "@/lib/motion";
 import { WATCH_STATUS_LABELS } from "@/lib/library-filter";
 import { priceChange } from "@/lib/price-history";
 import { sourceLabel } from "@/lib/source-labels";
@@ -225,7 +226,7 @@ export function ListingDetail({ initialListing }: { initialListing: ArchiveRecor
         />
       ) : photos.length > 0 ? (
         <section className="space-y-3">
-          <PhotoGallery photos={photos} title={listing.title} />
+          <PhotoGallery photos={photos} title={listing.title} transitionName={vtName("photo", listing.id)} />
           {photos.length > 1 && (
             <button
               type="button"

@@ -24,8 +24,14 @@ export function EquipmentTags({
         {title} <span className="text-xs font-normal text-muted">{items.length}</span>
       </h2>
       <ul className="mt-3 flex flex-wrap gap-1.5">
-        {shown.map((item) => (
-          <li key={item} className="rounded-full border border-border bg-card px-2.5 py-1 text-xs leading-4 text-ink">
+        {shown.map((item, i) => (
+          <li
+            key={item}
+            // 「もっと見る」で増えたタグだけ、ふわっと出す
+            className={`rounded-full border border-border bg-card px-2.5 py-1 text-xs leading-4 text-ink ${
+              i >= TAG_LIMIT ? "motion-crossfade" : ""
+            }`}
+          >
             {item}
           </li>
         ))}
@@ -49,7 +55,12 @@ export function FoldText({ text }: { text: string }) {
   const long = text.length > FOLD_CHARS || text.split("\n").length > FOLD_LINES;
   return (
     <div className="mt-3 rounded-xl border border-border bg-card p-4 shadow-sm">
-      <p className={`text-sm leading-7 break-words whitespace-pre-wrap text-ink ${long && !open ? "line-clamp-5" : ""}`}>
+      <p
+        key={open ? "open" : "closed"}
+        className={`text-sm leading-7 break-words whitespace-pre-wrap text-ink ${long && !open ? "line-clamp-5" : ""} ${
+          long ? "motion-crossfade" : ""
+        }`}
+      >
         {text}
       </p>
       {long && (

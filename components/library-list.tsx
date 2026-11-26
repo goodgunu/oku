@@ -8,6 +8,7 @@ import { readCompare, writeCompare } from "@/lib/compare";
 import { SOURCE_TABS, WATCH_STATUS_LABELS, matchesQuery, sourceCounts, type SourceFilter } from "@/lib/library-filter";
 import { DEFAULT_SORT, SORT_PRESETS, presetIdOf, sortListings, type SortState } from "@/lib/library-sort";
 import { LibraryPager } from "@/components/library-pager";
+import { Collapse, NAV_FORWARD, SharedElement, Stagger, vtName } from "@/lib/motion";
 import { DEFAULT_PAGE_SIZE, PAGE_SIZES, PAGE_SIZE_KEY, paginate, parsePage, parsePageSize, type PageSize } from "@/lib/library-page";
 import { priceChange } from "@/lib/price-history";
 import { sourceLabel } from "@/lib/source-labels";
@@ -45,6 +46,8 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
     typeof window === "undefined" ? 1 : parsePage(new URLSearchParams(window.location.search).get("page")),
   );
   const listTopRef = useRef<HTMLDivElement>(null);
+  // ♡を押した時だけポンと弾ませる（id と押した回数を key にして毎回動かす）
+  const [favPop, setFavPop] = useState<{ id: string; n: number } | null>(null);
 
   // 折りたたみ式「＋ URLから直接追加」フォーム
   const [showAdd, setShowAdd] = useState<boolean>(() => initialListings.length === 0);
@@ -180,6 +183,7 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
 
   async function toggleFavorite(item: ArchiveRecord) {
     const nextFav = !item.favorite;
+    setFavPop((prev) => ({ id: item.id, n: (prev?.n ?? 0) + 1 }));
     setListings((prev) => prev.map((r) => (r.id === item.id ? { ...r, favorite: nextFav || undefined } : r)));
     await fetch(`/api/library/${item.id}`, {
       method: "PATCH",
@@ -220,7 +224,7 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
             type="button"
             aria-expanded={showAdd}
             onClick={() => setShowAdd((v) => !v)}
-            className={`inline-flex h-8 items-center gap-1 rounded-full border px-3 text-xs font-bold transition ${
+            className={`motion-press inline-flex h-8 items-center gap-1 rounded-full border px-3 text-xs font-bold transition-colors ${
               showAdd
                 ? "border-ink bg-ink text-white"
                 : "border-[#ffdc00] bg-[#ffdc00] text-black hover:bg-[#f5c400]"
@@ -238,7 +242,8 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
       </div>
 
       {/* 折りたたみ URL 追加フォーム */}
-      {showAdd && (
+      {/* 高さ＋フェードで開閉（中身は小さめのフォームだけ） */}
+      <Collapse open={showAdd}>
         <form
           onSubmit={onAddSubmit}
           className="rounded-2xl border border-[#F3E5AB] bg-[#FFF8D6]/60 p-4 shadow-xs sm:p-5"
@@ -273,7 +278,7 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
             出品が生きているうちにURLを貼ると、タイトル・価格・写真などをメモとして残します。各アプリの共有からLINEの「おく」へ送ることもできます。
           </p>
         </form>
-      )}
+      </Collapse>
 
       {listings.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border bg-card px-5 py-12 text-center text-sm leading-7 text-muted">
@@ -446,7 +451,8 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
                 </select>
               </label>
             </div>
-            <ul className="min-w-0 space-y-3">
+            {/* ページを替えると key が変わり、カードが上から順にふわっと入れ替わる（最初の10件まで時間差） */}
+            <Stagger as="ul" key={paged.page} className="min-w-0 space-y-3">
               {paged.items.map((item) => {
                 const first = item.photos[0];
                 const thumb = first?.key ? `/api/photo/${item.id}/0` : first?.url;
@@ -455,21 +461,24 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
                 return (
                   <li
                     key={item.id}
-                    className={`flex min-w-0 gap-3 rounded-2xl border bg-card p-3 shadow-sm transition sm:p-4 ${
+                    className={`oku-card-press motion-lift flex min-w-0 gap-3 rounded-2xl border bg-card p-3 shadow-sm sm:p-4 ${
                       compared ? "border-2 border-[#ffdc00] bg-[#FFFDF2]" : "border-border hover:border-ink/20"
                     } ${item.watchStatus === "passed" ? "opacity-60" : ""}`}
                   >
-                    <Link href={`/listings/${item.id}`} className="flex min-w-0 flex-1 gap-3">
-                      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-border bg-background sm:h-24 sm:w-24">
-                        {thumb ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={thumb} alt="" className="h-full w-full object-cover" />
-                        ) : (
-                          <div className="flex h-full items-center justify-center bg-yahoo/40 text-xs font-bold text-ink/50">
-                            おく
-                          </div>
-                        )}
-                      </div>
+                    <Link href={`/listings/${item.id}`} transitionTypes={[NAV_FORWARD]} className="flex min-w-0 flex-1 gap-3">
+                      {/* 詳細の1枚目の写真とつながって見える（View Transitions。非対応ならふつうに切り替わる） */}
+                      <SharedElement name={vtName("photo", item.id)}>
+                        <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-border bg-background sm:h-24 sm:w-24">
+                          {thumb ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={thumb} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            <div className="flex h-full items-center justify-center bg-yahoo/40 text-xs font-bold text-ink/50">
+                              おく
+                            </div>
+                          )}
+                        </div>
+                      </SharedElement>
                       <div className="min-w-0 flex-1">
                         <div className="mb-1 flex flex-wrap items-center gap-1.5">
                           <AvailabilityBadge value={item.availability} />
@@ -521,7 +530,12 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
                             item.favorite ? "text-amber-500" : "text-muted/50 hover:text-ink"
                           }`}
                         >
-                          {item.favorite ? "♥" : "♡"}
+                          <span
+                            key={favPop?.id === item.id ? favPop.n : 0}
+                            className={`inline-block ${favPop?.id === item.id ? "motion-pop" : ""}`}
+                          >
+                            {item.favorite ? "♥" : "♡"}
+                          </span>
                         </button>
                         <button
                           type="button"
@@ -552,7 +566,7 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
                   </li>
                 );
               })}
-            </ul>
+            </Stagger>
             <LibraryPager page={paged.page} totalPages={paged.totalPages} onChange={goToPage} />
             </div>
           )}
@@ -561,7 +575,7 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
 
       {/* 下部固定の比較バー */}
       {(compareIds.length > 0 || compareMode) && (
-        <div className="fixed inset-x-0 bottom-3 z-30 mx-auto max-w-md px-4">
+        <div className="motion-crossfade fixed inset-x-0 bottom-3 z-30 mx-auto max-w-md px-4">
           <div className="flex items-center justify-between gap-3 rounded-full border border-black/20 bg-ink px-4 py-2.5 text-xs font-bold text-white shadow-lg">
             <span>
               {compareIds.length > 0

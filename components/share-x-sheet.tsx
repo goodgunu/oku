@@ -13,6 +13,7 @@ import {
   togglePhoto,
   weightedLength,
 } from "@/lib/share";
+import { useReveal } from "@/lib/motion";
 import type { ArchiveRecord } from "@/lib/types";
 
 export function XIcon({ className = "size-4" }: { className?: string }) {
@@ -58,6 +59,9 @@ export function ShareXSheet({
   const length = weightedLength(body);
   const over = length > X_LIMIT;
   const preview = `${body}\nhttps://…/s/…`;
+
+  // 開いた時にシートが下からふわっと出る（開くまでは監視しない）
+  const sheetReveal = useReveal<HTMLDivElement>("fade-up", { enabled: open });
 
   if (!open) return null;
 
@@ -128,12 +132,13 @@ export function ShareXSheet({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="motion-crossfade fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       role="dialog"
       aria-modal="true"
       onClick={() => onOpenChange(false)}
     >
       <div
+        {...sheetReveal}
         className="max-h-[90vh] w-full max-w-md space-y-3 overflow-y-auto rounded-2xl border border-border bg-card p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >

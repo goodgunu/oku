@@ -8,6 +8,7 @@ import { LandingLineFlow } from "@/components/landing-line-flow";
 import { MockHeroCard, MockList, SAMPLE_ACTIVE, SamplePhoto } from "@/components/landing-mocks";
 import { LoginOptions } from "@/components/login-options";
 import { Wordmark } from "@/components/wordmark";
+import { Reveal, Stagger } from "@/lib/motion";
 
 const YELLOW = "#ffdc00";
 const LINE_ACCOUNT_ID = "@916kdopz";
@@ -55,7 +56,8 @@ export function LandingPage() {
         style={{ background: "#FFF8D6", color: "#1C1917" }}
       >
         <div className="mx-auto grid max-w-6xl items-center gap-6 px-4 py-7 sm:px-7 sm:py-10 lg:grid-cols-[minmax(0,1.12fr)_minmax(260px,0.88fr)] lg:gap-8">
-          <div className="min-w-0">
+          {/* 開いた時に、見出し→説明→フォームの順にふわっと出る */}
+          <Stagger className="min-w-0">
             <p className="text-xs font-bold tracking-[0.12em]" style={{ color: "#B45309" }}>
               落札や掲載終了の前に · ヤフオク・メルカリ・PayPayフリマ・ジモティー対応
             </p>
@@ -121,7 +123,7 @@ export function LandingPage() {
               ) : null}
               <button
                 type="submit"
-                className="mt-2.5 w-full rounded-lg py-3 text-[15px] font-extrabold text-black shadow-xs transition hover:brightness-95"
+                className="motion-press mt-2.5 w-full rounded-lg py-3 text-[15px] font-extrabold text-black shadow-xs hover:brightness-95"
                 style={{ background: YELLOW }}
               >
                 出品を残す
@@ -130,11 +132,11 @@ export function LandingPage() {
                 タイトル、価格、写真、状態、出品者情報を読み取って保存します。
               </p>
             </form>
-          </div>
+          </Stagger>
 
-          <div className="min-w-0">
+          <Reveal className="min-w-0" delay={180}>
             <MockHeroCard />
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -145,7 +147,7 @@ export function LandingPage() {
         style={{ background: YELLOW, color: "#1C1917" }}
       >
         <div className="mx-auto grid max-w-6xl items-center gap-6 px-4 py-8 sm:px-7 sm:py-10 lg:grid-cols-2 lg:gap-10">
-          <div className="min-w-0">
+          <Reveal className="min-w-0">
             <p className="text-xs font-extrabold tracking-[0.14em] text-black/75">毎日、自動でチェック</p>
             <h2 className="mt-2 text-[1.65rem] leading-snug font-extrabold tracking-tight text-black sm:text-4xl">
               毎日自動で確認。
@@ -202,8 +204,9 @@ export function LandingPage() {
                 </a>
               </div>
             </div>
-          </div>
+          </Reveal>
 
+          <Reveal className="min-w-0" variant="slide-right" delay={90}>
           <div
             className="relative mx-auto w-full max-w-sm min-w-0 overflow-hidden rounded-2xl bg-white shadow-lg lg:mx-0"
             style={{ color: "#1C1917" }}
@@ -252,20 +255,21 @@ export function LandingPage() {
               </p>
             </div>
           </div>
+          </Reveal>
         </div>
       </section>
 
       {/* ログイン・新規登録モーダル */}
       {showLogin && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center"
+          className="motion-crossfade fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-4 sm:items-center"
           role="dialog"
           aria-modal="true"
           onClick={(event) => {
             if (event.target === event.currentTarget) setShowLogin(false);
           }}
         >
-          <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
+          <Reveal variant="fade-up" className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl">
             <p className="text-xs font-bold tracking-[0.14em]" style={{ color: "#B45309" }}>
               ログイン・新規登録
             </p>
@@ -281,7 +285,7 @@ export function LandingPage() {
             >
               閉じる
             </button>
-          </div>
+          </Reveal>
         </div>
       )}
 
@@ -289,7 +293,7 @@ export function LandingPage() {
       <section className="rounded-3xl border border-[#F3E5AB] px-4 py-8 sm:px-7" style={{ background: "#FFF8D6" }}>
         <div className="mx-auto max-w-6xl">
           <h2 className="text-lg font-bold text-ink">アカウントに残るもの</h2>
-          <ul className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3">
+          <Stagger as="ul" className="mt-3 grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-3">
             {kept.map(([title, body, Icon]) => (
               <li
                 key={title}
@@ -308,7 +312,7 @@ export function LandingPage() {
                 </p>
               </li>
             ))}
-          </ul>
+          </Stagger>
         </div>
       </section>
 
@@ -319,13 +323,13 @@ export function LandingPage() {
         style={{ background: "#FAF7F2" }}
       >
         <div className="mx-auto max-w-6xl">
-          <div className="max-w-md min-w-0">
+          <Reveal className="max-w-md min-w-0">
             <h2 className="text-lg font-bold text-ink">残る</h2>
             <p className="mt-1 text-sm leading-6 text-muted">
               落札や削除で出品が終わっても、アカウントに残る。自分のメモも書ける。
             </p>
             <MockList />
-          </div>
+          </Reveal>
         </div>
       </section>
 
@@ -337,7 +341,7 @@ export function LandingPage() {
       {/* 下部 LINE友だち追加 CTA */}
       <section className="rounded-3xl border border-[#CBEFD8]" style={{ background: "#E7F6EC" }}>
         <div className="mx-auto max-w-6xl px-4 py-8 sm:px-7">
-          <div>
+          <Reveal>
             <h2 className="text-lg font-bold text-ink">LINEに送ると、その場で残る</h2>
             <p className="mt-2 max-w-2xl text-sm leading-7 text-muted">
               下のボタンで公式LINE「おく」を友だち追加します。IDは {LINE_ACCOUNT_ID} です。追加したあと、各サイトの共有から「おく」を選ぶと、アカウントに保存されます。
@@ -353,7 +357,7 @@ export function LandingPage() {
                 公式LINE「おく」を友だち追加（{LINE_ACCOUNT_ID}）
               </a>
             </div>
-          </div>
+          </Reveal>
         </div>
       </section>
 

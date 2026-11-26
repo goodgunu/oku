@@ -83,7 +83,7 @@ export function NotifySettingCard() {
       ) : !state.lineLinked ? (
         <a
           href="/api/auth/line-login?link=1&next=%2F"
-          className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 text-xs font-bold text-white shadow-xs"
+          className="motion-crossfade motion-press inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 text-xs font-bold text-white shadow-xs"
           style={{ background: "#06C755" }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -97,15 +97,17 @@ export function NotifySettingCard() {
           aria-checked={state.enabled}
           disabled={state.saving}
           onClick={() => void toggle()}
-          className="inline-flex shrink-0 items-center gap-2 self-start rounded-full border border-border px-3 py-1.5 text-xs font-bold transition disabled:opacity-50 sm:self-center"
+          className="motion-crossfade motion-press inline-flex shrink-0 items-center gap-2 self-start rounded-full border border-border px-3 py-1.5 text-xs font-bold disabled:opacity-50 sm:self-center"
           style={
             state.enabled
               ? { background: "#EAFBF0", borderColor: "#06C755", color: "#057A35" }
               : { background: "#F4F4F5", color: "#52525B" }
           }
         >
+          {/* ON/OFF を切り替えたら丸がポンと弾む */}
           <span
-            className="size-2.5 rounded-full"
+            key={state.enabled ? "on" : "off"}
+            className="motion-pop inline-block size-2.5 rounded-full"
             style={{ background: state.enabled ? "#06C755" : "#A1A1AA" }}
           />
           {state.enabled ? "お知らせ ON" : "お知らせ OFF"}

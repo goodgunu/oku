@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { pageButtons } from "@/lib/library-page";
 
 const YELLOW = "#ffdc00";
-const BASE = "inline-flex h-11 min-w-11 items-center justify-center rounded-full text-sm font-bold tabular-nums";
+const BASE = "motion-press inline-flex h-11 min-w-11 items-center justify-center rounded-full text-sm font-bold tabular-nums";
 
 // 一覧の下のページ送り（前へ・番号・次へ）。タップしやすいよう44px
 export function LibraryPager({ page, totalPages, onChange }: { page: number; totalPages: number; onChange: (page: number) => void }) {

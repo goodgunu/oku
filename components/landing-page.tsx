@@ -415,6 +415,55 @@ export function LandingPage() {
         </div>
       </section>
 
+      {/* よくある質問 */}
+      <section id="faq" className="rounded-3xl border border-border bg-white px-4 py-6 sm:px-7">
+        <div className="mx-auto max-w-6xl">
+          <h2 className="text-base font-bold text-ink">よくある質問</h2>
+          <div className="mt-3 divide-y divide-border rounded-2xl border border-border bg-[#FAF7F2]">
+            <details className="group px-4 py-3">
+              <summary className="cursor-pointer list-none text-sm font-bold text-ink">
+                対応しているURLと、保存できないケースは？
+              </summary>
+              <p className="mt-2 text-xs leading-6 text-muted">
+                ヤフオク・メルカリ・PayPayフリマ・ジモティーの出品ページURLに対応しています。すでに削除されたページ、ログインが必要な限定ページ、一部アプリ専用の短縮URLは読み取れないことがあります。
+              </p>
+            </details>
+            <details className="group px-4 py-3">
+              <summary className="cursor-pointer list-none text-sm font-bold text-ink">
+                LINE通知の条件と、止め方を教えてください
+              </summary>
+              <p className="mt-2 text-xs leading-6 text-muted">
+                通知が届くのは、一覧でお気に入り（♥）に登録した出品だけです。毎朝の確認で値下げや終了が見つかった日に1通にまとめて届きます。止めたいときは、出品の♥を外すか、ログイン後の通知設定からいつでもオフにできます。
+              </p>
+            </details>
+            <details className="group px-4 py-3">
+              <summary className="cursor-pointer list-none text-sm font-bold text-ink">
+                データの削除や退会はできますか？
+              </summary>
+              <p className="mt-2 text-xs leading-6 text-muted">
+                保存した出品は一覧の「消す」ボタンからいつでも削除できます。アカウントごと削除したい場合は、右上のアカウントメニューまたはプライバシーポリシー記載の窓口から手続きできます。
+              </p>
+            </details>
+            <details className="group px-4 py-3">
+              <summary className="cursor-pointer list-none text-sm font-bold text-ink">
+                写真や出品情報の扱いは？
+              </summary>
+              <p className="mt-2 text-xs leading-6 text-muted">
+                保存した写真・タイトル・価格は、本人のアカウント内での個人メモ・比較用として保管されます。写真や文章の権利は出品者と各サイトに帰属します。
+              </p>
+            </details>
+            <details className="group px-4 py-3">
+              <summary className="cursor-pointer list-none text-sm font-bold text-ink">
+                スマホのホーム画面に追加してアプリのように使えますか？
+              </summary>
+              <p className="mt-2 text-xs leading-6 text-muted">
+                はい。iPhoneのSafariは画面下の共有ボタンから「ホーム画面に追加」、AndroidのChromeは右上メニューから「ホーム画面に追加」を選ぶとアイコンからすぐ開けます。
+              </p>
+            </details>
+          </div>
+        </div>
+      </section>
+
       {/* フッター */}
       <footer className="rounded-2xl px-4 pt-4 pb-3 sm:px-7" style={{ background: YELLOW, color: "#111111" }}>
         <div className="mx-auto max-w-6xl">

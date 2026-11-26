@@ -1,6 +1,6 @@
 import type { ArchiveRecord } from "@/lib/types";
 
-export type SortKey = "saved" | "ending" | "price" | "drop" | "bids";
+export type SortKey = "saved" | "changed" | "ending" | "price" | "drop" | "bids";
 export type SortDir = "asc" | "desc";
 export type SortState = { key: SortKey; dir: SortDir } | null;
 
@@ -8,6 +8,7 @@ export const DEFAULT_SORT: { key: SortKey; dir: SortDir } = { key: "saved", dir:
 
 export const SORT_PRESETS: { id: string; label: string; sort: { key: SortKey; dir: SortDir } }[] = [
   { id: "saved-desc", label: "新しく保存した順", sort: { key: "saved", dir: "desc" } },
+  { id: "changed-desc", label: "変化ありを上にまとめる", sort: { key: "changed", dir: "desc" } },
   { id: "ending-asc", label: "終了が近い順", sort: { key: "ending", dir: "asc" } },
   { id: "price-asc", label: "価格の安い順", sort: { key: "price", dir: "asc" } },
   { id: "price-desc", label: "価格の高い順", sort: { key: "price", dir: "desc" } },
@@ -43,6 +44,15 @@ function value(r: ArchiveRecord, key: SortKey, nowMs: number): number | null {
       const t = Date.parse(r.endTime);
       if (Number.isNaN(t) || t <= nowMs) return null;
       return t;
+    }
+    case "changed": {
+      const points = (r.priceHistory ?? []).filter((p) => p.priceYen != null);
+      const hasPriceDiff =
+        points.length >= 2 && points[0].priceYen !== points[points.length - 1].priceYen;
+      const changed = hasPriceDiff || r.availability === "ended";
+      const t = Date.parse(r.updatedAt || r.savedAt);
+      const base = Number.isNaN(t) ? 0 : t;
+      return (changed ? 1e15 : 0) + base;
     }
     case "saved": {
       const t = Date.parse(r.savedAt);

@@ -165,3 +165,31 @@ test("formatRemainingTime, endedPriceHeading, and ending-asc sort work", () => {
     ["soon", "later", "ended", "noEnd"],
   );
 });
+
+test("changed-desc sort puts price-changed and ended items first", () => {
+  const unchanged = sampleRecord({
+    id: "unchanged",
+    availability: "live",
+    updatedAt: "2026-11-26T10:00:00.000Z",
+    priceHistory: [{ at: "2026-11-25T00:00:00.000Z", priceLabel: "15,000円", priceYen: 15000 }],
+  });
+  const dropped = sampleRecord({
+    id: "dropped",
+    availability: "live",
+    updatedAt: "2026-11-26T08:00:00.000Z",
+    priceHistory: [
+      { at: "2026-11-25T00:00:00.000Z", priceLabel: "15,000円", priceYen: 15000 },
+      { at: "2026-11-26T08:00:00.000Z", priceLabel: "13,000円", priceYen: 13000 },
+    ],
+  });
+  const ended = sampleRecord({
+    id: "ended",
+    availability: "ended",
+    updatedAt: "2026-11-26T09:00:00.000Z",
+  });
+  const ordered = sortListings([unchanged, dropped, ended], { key: "changed", dir: "desc" });
+  assert.deepEqual(
+    ordered.map((x) => x.id),
+    ["ended", "dropped", "unchanged"],
+  );
+});

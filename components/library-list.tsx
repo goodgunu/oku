@@ -21,6 +21,19 @@ type ArchiveResponse = {
   record?: ArchiveRecord;
 };
 
+function sourceBadgeClass(source: ArchiveRecord["source"]): string {
+  switch (source) {
+    case "mercari":
+      return "border-rose-200 bg-rose-50 text-rose-800";
+    case "paypay":
+      return "border-sky-200 bg-sky-50 text-sky-800";
+    case "jmty":
+      return "border-emerald-200 bg-emerald-50 text-emerald-800";
+    default:
+      return "border-[#E5C200] bg-[#FFF8D6] text-ink";
+  }
+}
+
 export function LibraryList({ listings: initialListings }: { listings: ArchiveRecord[] }) {
   const router = useRouter();
   const [listings, setListings] = useState<ArchiveRecord[]>(initialListings);
@@ -49,6 +62,9 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
   const listTopRef = useRef<HTMLDivElement>(null);
   // ♡を押した時だけポンと弾ませる（id と押した回数を key にして毎回動かす）
   const [favPop, setFavPop] = useState<{ id: string; n: number } | null>(null);
+  const [highlightId] = useState<string | null>(() =>
+    typeof window === "undefined" ? null : new URLSearchParams(window.location.search).get("highlight"),
+  );
 
   // 折りたたみ式「＋ URLから直接追加」フォーム
   const [showAdd, setShowAdd] = useState<boolean>(() => initialListings.length === 0);
@@ -281,6 +297,22 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
         </form>
       </Collapse>
 
+      {addBusy && (
+        <div
+          aria-live="polite"
+          className="flex items-center gap-3 rounded-2xl border border-[#E5C200] bg-[#FFFDF2] p-3.5 shadow-xs"
+        >
+          <div className="grid h-16 w-16 shrink-0 place-items-center rounded-xl bg-[#FFF8D6] text-xs font-bold text-amber-800">
+            取得中
+          </div>
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <p className="text-xs font-bold text-ink">出品ページを読み取っています…</p>
+            <div className="h-3 w-3/4 rounded bg-black/10" />
+            <div className="h-3 w-1/2 rounded bg-black/10" />
+          </div>
+        </div>
+      )}
+
       {listings.length === 0 ? (
         <div className="rounded-2xl border border-[#F3E5AB] bg-[#FFF8D6]/60 px-5 py-6 text-left">
           <p className="text-sm font-extrabold text-ink">まずは気になる出品を1件残してみましょう</p>
@@ -476,7 +508,7 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
               </label>
             </div>
             {/* ページを替えると key が変わり、カードが上から順にふわっと入れ替わる（最初の10件まで時間差） */}
-            <Stagger as="ul" key={paged.page} className="min-w-0 space-y-3">
+            <Stagger as="ul" key={paged.page} skip={3} className="min-w-0 space-y-3">
               {paged.items.map((item) => {
                 const first = item.photos[0];
                 const thumb = first?.key ? `/api/photo/${item.id}/0` : first?.url;
@@ -488,7 +520,7 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
                     key={item.id}
                     className={`oku-card-press motion-lift flex min-w-0 gap-3 rounded-2xl border bg-card p-3 shadow-sm sm:p-4 ${
                       compared ? "border-2 border-[#ffdc00] bg-[#FFFDF2]" : "border-border hover:border-ink/20"
-                    } ${item.watchStatus === "passed" ? "opacity-60" : ""}`}
+                    } ${item.watchStatus === "passed" ? "opacity-60" : ""} ${highlightId === item.id ? "motion-highlight" : ""}`}
                   >
                     <Link href={`/listings/${item.id}`} transitionTypes={[NAV_FORWARD]} className="flex min-w-0 flex-1 gap-3">
                       {/* 詳細の1枚目の写真とつながって見える（View Transitions。非対応ならふつうに切り替わる） */}
@@ -507,7 +539,7 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
                       <div className="min-w-0 flex-1">
                         <div className="mb-1 flex flex-wrap items-center gap-1.5">
                           <AvailabilityBadge value={item.availability} />
-                          <span className="rounded-full border border-[#E5C200] bg-[#FFF8D6] px-2 py-0.5 text-[10px] font-bold text-ink">
+                          <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold ${sourceBadgeClass(item.source)}`}>
                             {sourceLabel(item.source)}
                           </span>
                           {item.watchStatus && item.watchStatus !== "watching" && (
@@ -519,7 +551,7 @@ export function LibraryList({ listings: initialListings }: { listings: ArchiveRe
                             <span
                               className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                                 remaining.urgent
-                                  ? "motion-pop bg-red-100 text-red-700"
+                                  ? "motion-pop-once bg-red-100 text-red-700"
                                   : "bg-stone-100 text-stone-700"
                               }`}
                             >
